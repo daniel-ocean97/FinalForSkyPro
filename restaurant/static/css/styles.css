@@ -1,0 +1,34 @@
+/* restaurant/static/css/styles.css */
+body {
+    padding-top: 60px; /* Для отступа под фиксированную шапку */
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.card-img-top {
+    max-height: 300px;
+    object-fit: cover;
+}
+
+.btn-book {
+    width: 100%;
+}
+
+/* restaurant/static/css/styles.css */
+body {
+    margin: 0;
+    padding: 0;
+    background: url('/static/images/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff; /* Цвет текста по умолчанию */
+}
+
+/* Обертка для контента поверх фона */
+.container {
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    padding: 2rem;
+    border-radius: 10px;
+}
+
