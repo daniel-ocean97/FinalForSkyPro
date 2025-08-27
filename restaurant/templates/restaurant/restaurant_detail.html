@@ -1,312 +1,87 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}{{ restaurant.name|default:"Ресторан" }}{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <!-- Свои стили -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-    
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #c19a6b;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --light-text: #7f8c8d;
-            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--dark-text);
-            background-color: #fff;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        main {
-            flex: 1;
-        }
-        
-        .navbar {
-            box-shadow: var(--shadow);
-            padding: 0.8rem 1rem;
-        }
-        
-        .navbar-brand {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-        
-        .nav-link {
-            font-weight: 500;
-            color: var(--primary-color);
-            padding: 0.5rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-link:hover {
-            background-color: rgba(44, 62, 80, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 5rem 0;
-            margin-bottom: 3rem;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-img-top {
-            height: 250px;
-            object-fit: cover;
-        }
-        
-        .btn-primary {
-            background-color: var(--accent-color);
-            border: none;
-            padding: 0.7rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-        
-        .info-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
-        
-        .info-item i {
-            margin-right: 10px;
-            color: var(--accent-color);
-            font-size: 1.2rem;
-            width: 24px;
-        }
-        
-        .rating-badge {
-            background-color: var(--accent-color);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 2rem 0;
-            margin-top: 3rem;
-        }
-        
-        .social-links a {
-            color: white;
-            font-size: 1.5rem;
-            margin-right: 1rem;
-            transition: color 0.3s ease;
-        }
-        
-        .social-links a:hover {
-            color: var(--accent-color);
-        }
-        
-        @media (max-width: 768px) {
-            .hero-section {
-                padding: 3rem 0;
-            }
-            
-            .display-4 {
-                font-size: 2.2rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav class="container mb-3 mt-3">
-            <div class="container">
-                <a class="navbar-brand" href="{% url 'restaurant:restaurant_detail' %}">
-                    {% if restaurant.logo %}
-                        <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" height="40" class="d-inline-block align-text-top me-2">
-                    {% endif %}
-                    {{ restaurant.name|default:"Ресторан" }}
-                </a>
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'restaurant:restaurant_detail' %}">Главная</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Меню</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Бронирование</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Контакты</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
+<!-- restaurant/templates/restaurant/restaurant_detail.html -->
+{% extends "base.html" %}
+{% load static %}
 
-    <main>
-        {% block content %}
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="container text-center">
-                <h1 class="display-4 fw-bold mb-4">{{ restaurant.name }}</h1>
-                <p class="lead mb-4">Искусство гастрономии в каждом блюде</p>
-                <a href="#" class="btn btn-primary btn-lg">Забронировать стол</a>
-            </div>
-        </section>
+{% block title %}{{ restaurant.name }}{% endblock %}
 
-        <!-- Restaurant Details -->
-        <div class="container mb-5">
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100">
-                        {% if restaurant.logo %}
-                        <img src="{{ restaurant.logo.url }}" class="card-img-top" alt="{{ restaurant.name }}">
-                        {% else %}
-                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" class="card-img-top" alt="Ресторан">
-                        {% endif %}
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">{{ restaurant.name }}</h1>
+        <p class="lead mb-4">Искусство гастрономии в каждом блюде</p>
+        <a href="#" class="btn btn-primary btn-lg">Забронировать стол</a>
+        <a href="#" class="btn btn-primary btn-lg">Забронировать зал</a>
+    </div>
+</section>
+
+<!-- Restaurant Details -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                {% if restaurant.facade_image %}
+                <img src="{{ restaurant.facade_image.url }}" class="card-img-top" alt="Фасад {{ restaurant.name }}" style="height: 400px; object-fit: cover;">
+                {% elif restaurant.cover_image %}
+                <img src="{{ restaurant.cover_image.url }}" class="card-img-top" alt="Фасад {{ restaurant.name }}" style="height: 400px; object-fit: cover;">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                    class="card-img-top" alt="Фасад ресторана" style="height: 400px; object-fit: cover;">
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">{{ restaurant.name }}</h2>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>{{ restaurant.address }}</span>
                     </div>
-                </div>
-                
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h2 class="card-title mb-4">{{ restaurant.name }}</h2>
-                            
-                            <div class="info-item">
-                                <i class="bi bi-geo-alt-fill"></i>
-                                <span>{{ restaurant.address }}</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <i class="bi bi-telephone-fill"></i>
-                                <span>{{ restaurant.phone }}</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <i class="bi bi-envelope-fill"></i>
-                                <span>{{ restaurant.email }}</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <i class="bi bi-clock-fill"></i>
-                                <span>{{ restaurant.opening_hours }}</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <i class="bi bi-star-fill"></i>
-                                <span class="rating-badge">
-                                    {{ restaurant.rating|floatformat:1 }} / 5.0
-                                </span>
-                            </div>
-                            
-                            <hr class="my-4">
-                            
-                            <div class="description mb-4">
-                                {{ restaurant.description|safe }}
-                            </div>
-                            
-                            <div class="d-grid gap-2 d-md-flex">
-                                <a href="#" class="btn btn-primary me-md-2">
-                                    <i class="bi bi-calendar-check me-2"></i>Забронировать стол
-                                </a>
-                                <a href="#" class="btn btn-outline-secondary">
-                                    <i class="bi bi-menu-button me-2"></i>Посмотреть меню
-                                </a>
-                            </div>
-                        </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span>{{ restaurant.phone }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-envelope-fill"></i>
+                        <span>{{ restaurant.email }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-clock-fill"></i>
+                        <span>{{ restaurant.opening_hours }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-star-fill"></i>
+                        <span class="rating-badge">
+                            {{ restaurant.rating|floatformat:1 }} / 5.0
+                        </span>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="description mb-4">
+                        {{ restaurant.description|safe }}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="#" class="btn btn-primary me-md-2">
+                            <i class="bi bi-calendar-check me-2"></i>Забронировать стол
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="bi bi-menu-button me-2"></i>Посмотреть меню
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        {% endblock %}
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>{{ restaurant.name|default:"Ресторан" }}</h5>
-                    <p>Искусство гастрономии в каждом блюде</p>
-                </div>
-                
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>Контакты</h5>
-                    <p>
-                        <i class="bi bi-geo-alt me-2"></i> {{ restaurant.address }}<br>
-                        <i class="bi bi-telephone me-2"></i> {{ restaurant.phone }}<br>
-                        <i class="bi bi-envelope me-2"></i> {{ restaurant.email }}
-                    </p>
-                </div>
-                
-                <div class="col-md-4">
-                    <h5>Мы в соцсетях</h5>
-                    <div class="social-links">
-                        <a href="#"><i class="bi bi-instagram"></i></a>
-                        <a href="#"><i class="bi bi-facebook"></i></a>
-                        <a href="#"><i class="bi bi-telegram"></i></a>
-                        <a href="#"><i class="bi bi-youtube"></i></a>
-                    </div>
-                </div>
-            </div>
-            
-            <hr class="my-4 bg-light">
-            
-            <div class="text-center">
-                <p>&copy; {{ restaurant.name|default:"Ресторан" }}, 2024. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Подключение JS -->
-    {% block extra_js %}
-    {% endblock %}
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

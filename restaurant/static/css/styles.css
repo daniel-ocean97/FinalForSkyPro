@@ -1,34 +1,236 @@
-/* restaurant/static/css/styles.css */
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #c19a6b;
+    --light-bg: #f8f9fa;
+    --dark-text: #2c3e50;
+    --light-text: #7f8c8d;
+    --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Фон для всей страницы */
 body {
-    padding-top: 60px; /* Для отступа под фиксированную шапку */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark-text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.9)), 
+                url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+main {
+    flex: 1;
+}
+
+.navbar {
+    box-shadow: var(--shadow);
+    padding: 0.8rem 1rem;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--primary-color);
+    padding: 0.5rem 1rem !important;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(44, 62, 80, 0.1);
+    color: var(--primary-color);
+}
+
+.hero-section {
+    color: white;
+    padding: 5rem 0;
+    margin-bottom: 3rem;
+    width: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 15px;
 }
 
 .card {
-    border-radius: 10px;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .card-img-top {
-    max-height: 300px;
+    height: 250px;
     object-fit: cover;
 }
 
-.btn-book {
-    width: 100%;
+/* Переопределяем стили Bootstrap для кнопок */
+html body .btn.btn-primary {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    padding: 0.7rem 1.5rem !important;
+    font-weight: 500 !important;
 }
 
-/* restaurant/static/css/styles.css */
-body {
-    margin: 0;
-    padding: 0;
-    background: url('/static/images/background.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff; /* Цвет текста по умолчанию */
+html body .btn.btn-primary:hover,
+html body .btn.btn-primary:focus,
+html body .btn.btn-primary:active {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    transform: translateY(-2px) !important;
 }
 
-/* Обертка для контента поверх фона */
-.container {
-    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
-    padding: 2rem;
-    border-radius: 10px;
+html body .btn.btn-outline-secondary {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
 }
 
+html body .btn.btn-outline-secondary:hover {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.info-item i {
+    margin-right: 10px;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    width: 24px;
+}
+
+.rating-badge {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+
+footer {
+    background-color: rgba(44, 62, 80, 0.95) !important;
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    backdrop-filter: blur(10px);
+}
+
+.social-links a {
+    color: white;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: var(--accent-color);
+}
+
+.description {
+    line-height: 1.6;
+}
+
+.description p {
+    margin-bottom: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+    
+    .display-4 {
+        font-size: 2.2rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .card-img-top {
+        height: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 2rem 0;
+        background-position: center center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-md-flex .btn {
+        width: auto;
+    }
+    
+    body {
+        background-attachment: scroll;
+    }
+}
+/* Стили для формы обратной связи */
+.form-label {
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(193, 154, 107, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* Стили для карты */
+.map-container {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+/* Иконки в дополнительной информации */
+.fs-1 {
+    color: var(--accent-color) !important;
+}

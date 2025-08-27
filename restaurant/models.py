@@ -24,6 +24,7 @@ class Restaurant(models.Model):
         null=True,
         verbose_name="Логотип"
     )
+    facade_image = models.ImageField(upload_to='restaurant_facades/', blank=True, null=True, verbose_name="Фото фасада")
 
     def __str__(self):
         return self.name

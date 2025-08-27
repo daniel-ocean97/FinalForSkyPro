@@ -1,0 +1,183 @@
+<!-- restaurant/templates/restaurant/contacts.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Контакты - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" 
+         style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Контакты</h1>
+        <p class="lead mb-4">Свяжитесь с нами любым удобным способом</p>
+    </div>
+</section>
+
+<!-- Contact Information & Form -->
+<div class="container mb-5">
+    <div class="row">
+        <!-- Контактная информация -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Контактная информация</h2>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>{{ restaurant.address }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span>{{ restaurant.phone }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-envelope-fill"></i>
+                        <span>{{ restaurant.email }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="bi bi-clock-fill"></i>
+                        <span>{{ restaurant.opening_hours }}</span>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Мы в соцсетях</h5>
+                    <div class="social-links">
+                        <a href="#" class="btn btn-outline-primary me-2 mb-2">
+                            <i class="bi bi-instagram me-2"></i>Instagram
+                        </a>
+                        <a href="#" class="btn btn-outline-primary me-2 mb-2">
+                            <i class="bi bi-facebook me-2"></i>Facebook
+                        </a>
+                        <a href="#" class="btn btn-outline-primary me-2 mb-2">
+                            <i class="bi bi-telegram me-2"></i>Telegram
+                        </a>
+                        <a href="#" class="btn btn-outline-primary mb-2">
+                            <i class="bi bi-youtube me-2"></i>YouTube
+                        </a>
+                    </div>
+
+                    <!-- Карта -->
+                    <hr class="my-4">
+                    <h5 class="mb-3">Как добраться</h5>
+                    <div class="map-container" style="border-radius: 12px; overflow: hidden;">
+                        <iframe 
+                            src="https://yandex.ru/map-widget/v1/?um=constructor%3A0a7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d7e6f2d&amp;source=constructor" 
+                            width="100%" 
+                            height="300" 
+                            frameborder="0"
+                            style="border-radius: 12px;">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Форма обратной связи -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Обратная связь</h2>
+                    <p class="text-muted mb-4">Заполните форму и мы свяжемся с вами в ближайшее время</p>
+                    
+                    <form method="post" action="{% url 'restaurant:contacts' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Имя *</label>
+                                <input type="text" class="form-control" id="name" name="name" required 
+                                       placeholder="Ваше имя">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Телефон *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required 
+                                       placeholder="+7 (999) 999-99-99">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="your@email.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Тема *</label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="">Выберите тему</option>
+                                <option value="reservation">Бронирование стола</option>
+                                <option value="event">Организация мероприятия</option>
+                                <option value="feedback">Отзыв о ресторане</option>
+                                <option value="complaint">Жалоба</option>
+                                <option value="other">Другое</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Сообщение *</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required 
+                                      placeholder="Ваше сообщение..."></textarea>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="agreement" name="agreement" required>
+                            <label class="form-check-label" for="agreement">
+                                Я соглашаюсь на обработку персональных данных
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-send me-2"></i>Отправить сообщение
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Дополнительная информация -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Дополнительная информация</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="bi bi-truck fs-1 text-primary mb-3"></i>
+                                <h5>Доставка</h5>
+                                <p class="text-muted">Бесплатная доставка в пределах города при заказе от 1000 руб.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="bi bi-credit-card fs-1 text-primary mb-3"></i>
+                                <h5>Оплата</h5>
+                                <p class="text-muted">Принимаем наличные, карты и бесконтактную оплату</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="bi bi-calendar-event fs-1 text-primary mb-3"></i>
+                                <h5>Мероприятия</h5>
+                                <p class="text-muted">Организуем банкеты, корпоративы и частные вечеринки</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
