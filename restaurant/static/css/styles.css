@@ -234,3 +234,38 @@ footer {
 .fs-1 {
     color: var(--accent-color) !important;
 }
+
+/* Стили для страницы "О ресторане" */
+.bg-light {
+    background-color: rgba(248, 249, 250, 0.9) !important;
+}
+
+.bg-primary {
+    background-color: rgba(44, 62, 80, 0.95) !important;
+}
+
+/* Иконки ценностей */
+.fs-1 {
+    color: var(--accent-color) !important;
+}
+
+/* Карточки команды */
+.team-card {
+    transition: transform 0.3s ease;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+}
+
+.team-card .card-img-top {
+    border-bottom: 3px solid var(--accent-color);
+}
+
+/* Призыв к действию */
+.cta-section {
+    background: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9)), 
+                url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+    background-size: cover;
+    background-position: center;
+}

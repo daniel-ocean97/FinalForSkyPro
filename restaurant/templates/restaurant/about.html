@@ -1,0 +1,190 @@
+<!-- restaurant/templates/restaurant/about.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}О ресторане - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" 
+         style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">О ресторане</h1>
+        <p class="lead mb-4">Узнайте нашу историю, ценности и команду</p>
+    </div>
+</section>
+
+<!-- История ресторана -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1474&q=80" 
+                         class="card-img-top" alt="История ресторана" style="height: 300px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Наша история</h2>
+                        <div class="description">
+                            <p>Ресторан {{ restaurant.name }} был основан в 2010 году с целью создания места, где гости могут насладиться не только изысканной кухней, но и особой атмосферой уюта и гостеприимства.</p>
+                            <p>Начав с небольшого семейного кафе, мы постепенно выросли в один из самых популярных ресторанов города, сохраняя при этом теплую атмосферу и внимательное отношение к каждому гостю.</p>
+                            <p>За эти годы мы провели сотни мероприятий, от романтических ужинов до масштабных свадебных торжеств, и каждый раз стремимся превзойти ожидания наших гостей.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Миссия и ценности -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2>Наша миссия и ценности</h2>
+                <p class="lead">Что делает нас особенными</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-star-fill fs-1 text-primary mb-3"></i>
+                        <h4>Миссия</h4>
+                        <p>Создавать незабываемые гастрономические впечатления, сочетая традиционные рецепты с современными техниками приготовления. Мы стремимся быть местом, где каждый гость чувствует себя особенным.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-heart-fill fs-1 text-primary mb-3"></i>
+                        <h4>Философия</h4>
+                        <p>Мы верим, что еда — это не просто sustenance, а искусство, которое объединяет людей. Наша философия основана на уважении к продуктам, традициям и, конечно, к нашим гостям.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-check fs-1 text-primary mb-3"></i>
+                        <h5>Качество</h5>
+                        <p>Мы используем только свежие, отборные продукты от проверенных поставщиков.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-arrow-repeat fs-1 text-primary mb-3"></i>
+                        <h5>Традиции</h5>
+                        <p>Сохраняем и развиваем кулинарные традиции, добавляя современные нотки.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill fs-1 text-primary mb-3"></i>
+                        <h5>Сообщество</h5>
+                        <p>Создаем пространство для общения, праздников и важных моментов жизни.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Команда -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2>Наша команда</h2>
+                <p class="lead">Профессионалы, которые создают магию</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 text-center">
+                    <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" 
+                         class="card-img-top" alt="Шеф-повар" style="height: 250px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Алексей Петров</h5>
+                        <p class="text-muted">Шеф-повар</p>
+                        <p class="card-text">Опыт работы 15 лет. Автор фирменных блюд ресторана.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 text-center">
+                    <img src="https://images.unsplash.com/photo-1566554273541-37a9ca77b91f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" 
+                         class="card-img-top" alt="Управляющий" style="height: 250px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Мария Иванова</h5>
+                        <p class="text-muted">Управляющий</p>
+                        <p class="card-text">Организатор мероприятий и мастер создания уютной атмосферы.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 text-center">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                         class="card-img-top" alt="Сомелье" style="height: 250px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Дмитрий Сидоров</h5>
+                        <p class="text-muted">Сомелье</p>
+                        <p class="card-text">Сертифицированный эксперт по винам с 10-летним опытом.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 text-center">
+                    <img src="https://images.unsplash.com/photo-1571019614244-c8d398a734d6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" 
+                         class="card-img-top" alt="Кондитер" style="height: 250px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Ольга Кузнецова</h5>
+                        <p class="text-muted">Шеф-кондитер</p>
+                        <p class="card-text">Автор изысканных десертов, которые стали визитной карточкой ресторана.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Призыв к действию -->
+<section class="hero-section" 
+         style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;">
+    <div class="container text-center">
+        <h2 class="mb-4">Хотите узнать больше?</h2>
+        <p class="lead mb-4">Посетите наш ресторан и ощутите атмосферу лично</p>
+        <a href="{% url 'restaurant:contacts' %}" class="btn btn-light btn-lg me-3">Связаться с нами</a>
+        <a href="#" class="btn btn-outline-light btn-lg">Забронировать стол</a>
+    </div>
+</section>
+{% endblock %}
+

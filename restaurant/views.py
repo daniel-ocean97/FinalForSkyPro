@@ -23,3 +23,7 @@ def contacts(request):
         return redirect('restaurant:contacts')
     
     return render(request, 'restaurant/contacts.html', {'restaurant': restaurant})
+
+def about(request):
+    restaurant = Restaurant.objects.first()
+    return render(request, 'restaurant/about.html', {'restaurant': restaurant})
