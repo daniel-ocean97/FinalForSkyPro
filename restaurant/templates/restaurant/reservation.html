@@ -87,13 +87,6 @@
                             <span class="badge bg-secondary rounded-circle p-2 mb-2">3</span>
                             <p class="mb-0 small">Ваши данные</p>
                         </div>
-                        <div class="flex-fill">
-                            <hr class="progress-divider">
-                        </div>
-                        <div class="text-center flex-fill">
-                            <span class="badge bg-secondary rounded-circle p-2 mb-2">4</span>
-                            <p class="mb-0 small">Подтверждение</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -129,61 +122,14 @@
                         
                         <h5 class="mt-4 mb-3">Доступное время</h5>
                         <div class="row" id="timeSlots">
+                            {% for hour in available_hours %}
                             <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    12:00
+                                <div class="card time-slot text-center p-2 {% if not hour.available %}bg-secondary text-white{% endif %}" 
+                                     data-time="{{ hour.time }}">
+                                    {{ hour.time }}
                                 </div>
                             </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    13:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2 bg-secondary text-white">
-                                    14:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    15:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    16:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2 bg-secondary text-white">
-                                    17:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    18:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    19:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    20:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2 bg-secondary text-white">
-                                    21:00
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-3 mb-2">
-                                <div class="card time-slot text-center p-2">
-                                    22:00
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
                         
                         <div class="d-grid gap-2 mt-4">
@@ -205,86 +151,21 @@
                         <p class="text-muted">Доступные столики на <span id="selectedDateTime">17 июня, 19:00</span> для <span id="selectedGuests">4 гостей</span></p>
                         
                         <div class="row mt-4">
+                            {% for table in tables %}
                             <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3">
-                                    <h5>Столик 1</h5>
-                                    <p class="text-muted">У окна</p>
+                                <div class="card table-card text-center p-3 {% if not table.available %}disabled{% endif %}" 
+                                     data-table-id="{{ table.id }}">
+                                    <h5>Столик {{ table.number }}</h5>
+                                    <p class="text-muted">{{ table.description }}</p>
                                     <div class="mt-2">
-                                        <span class="badge bg-success">Доступен</span>
+                                        <span class="badge {% if table.available %}bg-success{% else %}bg-danger{% endif %}">
+                                            {% if table.available %}Доступен{% else %}Занят{% endif %}
+                                        </span>
                                     </div>
-                                    <p class="mt-2 mb-0">до 4 человек</p>
+                                    <p class="mt-2 mb-0">до {{ table.capacity }} человек</p>
                                 </div>
                             </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3">
-                                    <h5>Столик 2</h5>
-                                    <p class="text-muted">В центре</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-success">Доступен</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 6 человек</p>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3 disabled">
-                                    <h5>Столик 3</h5>
-                                    <p class="text-muted">У камина</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-danger">Занят</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 2 человек</p>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3">
-                                    <h5>Столик 4</h5>
-                                    <p class="text-muted">В уединении</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-success">Доступен</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 4 человек</p>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3">
-                                    <h5>VIP 1</h5>
-                                    <p class="text-muted">Отдельная комната</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-success">Доступен</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 8 человек</p>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3 disabled">
-                                    <h5>VIP 2</h5>
-                                    <p class="text-muted">Отдельная комната</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-danger">Занят</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 10 человек</p>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3">
-                                    <h5>Столик 5</h5>
-                                    <p class="text-muted">На террасе</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-success">Доступен</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 4 человек</p>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3">
-                                    <h5>Столик 6</h5>
-                                    <p class="text-muted">На террасе</p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-success">Доступен</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">до 4 человек</p>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
                         
                         <div class="d-flex justify-content-between mt-4">
@@ -306,25 +187,31 @@
                         <h3 class="card-title mb-4">Ваши данные</h3>
                         
                         <form id="reservationForm">
+                            {% csrf_token %}
+                            <input type="hidden" id="selectedDate" name="date">
+                            <input type="hidden" id="selectedTime" name="time">
+                            <input type="hidden" id="selectedTable" name="table">
+                            <input type="hidden" id="selectedGuestsCount" name="guests_count">
+                            
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="clientName" class="form-label">Имя *</label>
-                                    <input type="text" class="form-control" id="clientName" required>
+                                    <input type="text" class="form-control" id="clientName" name="client_name" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="clientPhone" class="form-label">Телефон *</label>
-                                    <input type="tel" class="form-control" id="clientPhone" required>
+                                    <input type="tel" class="form-control" id="clientPhone" name="client_phone" required>
                                 </div>
                             </div>
                             
                             <div class="mb-3">
                                 <label for="clientEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="clientEmail">
+                                <input type="email" class="form-control" id="clientEmail" name="client_email">
                             </div>
                             
                             <div class="mb-3">
                                 <label for="specialRequests" class="form-label">Особые пожелания</label>
-                                <textarea class="form-control" id="specialRequests" rows="3" placeholder="Аллергии, праздник, особые требования..."></textarea>
+                                <textarea class="form-control" id="specialRequests" name="special_requests" rows="3" placeholder="Аллергии, праздник, особые требования..."></textarea>
                             </div>
                             
                             <div class="form-check mb-4">
@@ -336,7 +223,7 @@
                             
                             <div class="d-flex justify-content-between">
                                 <button type="button" class="btn btn-outline-secondary" onclick="showStep(2)">Назад</button>
-                                <button type="button" class="btn btn-primary" onclick="showStep(4)">Забронировать</button>
+                                <button type="submit" class="btn btn-primary">Забронировать</button>
                             </div>
                         </form>
                     </div>
@@ -344,52 +231,65 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Шаг 4: Подтверждение -->
-    <div class="confirmation-step" id="step4">
-        <div class="row">
-            <div class="col-lg-6 mx-auto">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="mb-4">
-                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+<!-- Модальное окно подтверждения -->
+<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservationModalLabel">Бронирование подтверждено!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                    <h3 class="my-3">Бронирование подтверждено!</h3>
+                    <p class="text-muted">Мы отправили детали бронирования на вашу почту</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="text-center">Детали бронирования</h5>
+                        <div class="info-item">
+                            <i class="bi bi-calendar-event"></i>
+                            <span id="modalDate"></span>
                         </div>
-                        <h3 class="card-title mb-3">Бронирование подтверждено!</h3>
-                        <p class="text-muted mb-4">Мы отправили детали бронирования на вашу почту</p>
-                        
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5>Детали бронирования</h5>
-                                <div class="info-item">
-                                    <i class="bi bi-calendar-event"></i>
-                                    <span>17 июня 2024, 19:00</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="bi bi-people"></i>
-                                    <span>4 гостя</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="bi bi-geo-alt"></i>
-                                    <span>Столик 2 (В центре)</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="bi bi-person"></i>
-                                    <span>Иван Иванов</span>
-                                </div>
-                            </div>
+                        <div class="info-item">
+                            <i class="bi bi-people"></i>
+                            <span id="modalGuests"></span>
                         </div>
-                        
-                        <p class="text-muted small mb-4">
-                            Пожалуйста, приходите за 10-15 минут до назначенного времени.<br>
-                            При отмене бронирования просим сообщить заранее.
-                        </p>
-                        
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'restaurant:restaurant_detail' %}" class="btn btn-primary">Вернуться на главную</a>
-                            <a href="#" class="btn btn-outline-secondary">Добавить в календарь</a>
+                        <div class="info-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span id="modalTable"></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="bi bi-person"></i>
+                            <span id="modalName"></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="bi bi-telephone"></i>
+                            <span id="modalPhone"></span>
+                        </div>
+                        <div class="info-item" id="modalEmailContainer" style="display: none;">
+                            <i class="bi bi-envelope"></i>
+                            <span id="modalEmail"></span>
+                        </div>
+                        <div class="info-item" id="modalRequestsContainer" style="display: none;">
+                            <i class="bi bi-chat-text"></i>
+                            <span id="modalRequests"></span>
                         </div>
                     </div>
                 </div>
+
+                <p class="text-muted small">
+                    Пожалуйста, приходите за 10-15 минут до назначенного времени.<br>
+                    При отмене бронирования просим сообщить заранее.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <a href="{% url 'restaurant:restaurant_detail' %}" class="btn btn-primary">Вернуться на главную</a>
             </div>
         </div>
     </div>
@@ -476,6 +376,9 @@
                     s.classList.remove('bg-primary', 'text-white');
                 });
                 this.classList.add('bg-primary', 'text-white');
+                
+                // Сохраняем выбранное время
+                document.getElementById('selectedTime').value = this.dataset.time;
             }
         });
     });
@@ -487,7 +390,69 @@
                 t.classList.remove('selected');
             });
             this.classList.add('selected');
+            
+            // Сохраняем выбранный столик
+            document.getElementById('selectedTable').value = this.dataset.tableId;
         });
+    });
+    
+    // Обработка формы бронирования
+    document.getElementById('reservationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Собираем данные
+        const formData = new FormData(this);
+        formData.append('date', document.getElementById('reservationDate').value);
+        formData.append('guests_count', document.getElementById('guestsCount').value);
+        
+        // Отправляем AJAX запрос
+        fetch('{% url "restaurant:reservation" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Заполняем модальное окно данными
+                document.getElementById('modalDate').textContent = data.reservation.date + ' ' + data.reservation.time;
+                document.getElementById('modalGuests').textContent = data.reservation.guests_count + ' гостя';
+                document.getElementById('modalTable').textContent = 'Столик ' + data.reservation.table_number + ' (' + data.reservation.table_description + ')';
+                document.getElementById('modalName').textContent = data.reservation.client_name;
+                document.getElementById('modalPhone').textContent = data.reservation.client_phone;
+                
+                if (data.reservation.client_email) {
+                    document.getElementById('modalEmail').textContent = data.reservation.client_email;
+                    document.getElementById('modalEmailContainer').style.display = 'flex';
+                }
+                
+                if (data.reservation.special_requests) {
+                    document.getElementById('modalRequests').textContent = data.reservation.special_requests;
+                    document.getElementById('modalRequestsContainer').style.display = 'flex';
+                }
+                
+                // Показываем модальное окно
+                var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+                reservationModal.show();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при бронировании. Пожалуйста, попробуйте еще раз.');
+        });
+    });
+    
+    // Обновляем скрытые поля при изменении данных
+    document.getElementById('reservationDate').addEventListener('change', function() {
+        document.getElementById('selectedDate').value = this.value;
+    });
+    
+    document.getElementById('guestsCount').addEventListener('change', function() {
+        document.getElementById('selectedGuestsCount').value = this.value;
     });
 </script>
 {% endblock %}
