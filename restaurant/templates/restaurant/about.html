@@ -183,7 +183,7 @@
         <h2 class="mb-4">Хотите узнать больше?</h2>
         <p class="lead mb-4">Посетите наш ресторан и ощутите атмосферу лично</p>
         <a href="{% url 'restaurant:contacts' %}" class="btn btn-light btn-lg me-3">Связаться с нами</a>
-        <a href="#" class="btn btn-outline-light btn-lg">Забронировать стол</a>
+        <a href="{% url 'restaurant:reservation' %}" class="btn btn-outline-light btn-lg">Забронировать стол</a>
     </div>
 </section>
 {% endblock %}

@@ -68,3 +68,13 @@ class Reservation(models.Model):
         verbose_name = "Бронирование"
         verbose_name_plural = "Бронирования"
         ordering = ['-date_time']  # Сортировка по дате (сначала новые)
+
+class Table(models.Model):
+    number = models.IntegerField(unique=True, verbose_name="Номер столика")
+    capacity = models.IntegerField(verbose_name="Вместимость")
+    description = models.CharField(max_length=255, blank=True, verbose_name="Описание")
+    is_active = models.BooleanField(default=True, verbose_name="Активный")
+    
+    def __str__(self):
+        return f"Столик {self.number} ({self.capacity} чел.)"
+

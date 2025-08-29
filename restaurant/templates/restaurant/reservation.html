@@ -1,0 +1,493 @@
+<!-- restaurant/templates/restaurant/reservation.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Бронирование - {{ restaurant.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .time-slot {
+        transition: all 0.3s ease;
+    }
+    
+    .time-slot:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .table-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .table-card:hover, .table-card.selected {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        border: 2px solid var(--accent-color);
+    }
+    
+    .table-card.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .confirmation-step {
+        display: none;
+    }
+    
+    .confirmation-step.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" 
+         style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Бронирование столика</h1>
+        <p class="lead mb-4">Забронируйте столик онлайн всего за несколько кликов</p>
+    </div>
+</section>
+
+<!-- Процесс бронирования -->
+<div class="container mb-5">
+    <!-- Индикатор прогресса -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-center flex-fill">
+                            <span class="badge bg-primary rounded-circle p-2 mb-2">1</span>
+                            <p class="mb-0 small">Выбор даты и времени</p>
+                        </div>
+                        <div class="flex-fill">
+                            <hr class="progress-divider">
+                        </div>
+                        <div class="text-center flex-fill">
+                            <span class="badge bg-secondary rounded-circle p-2 mb-2">2</span>
+                            <p class="mb-0 small">Выбор столика</p>
+                        </div>
+                        <div class="flex-fill">
+                            <hr class="progress-divider">
+                        </div>
+                        <div class="text-center flex-fill">
+                            <span class="badge bg-secondary rounded-circle p-2 mb-2">3</span>
+                            <p class="mb-0 small">Ваши данные</p>
+                        </div>
+                        <div class="flex-fill">
+                            <hr class="progress-divider">
+                        </div>
+                        <div class="text-center flex-fill">
+                            <span class="badge bg-secondary rounded-circle p-2 mb-2">4</span>
+                            <p class="mb-0 small">Подтверждение</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шаг 1: Выбор даты и времени -->
+    <div class="confirmation-step active" id="step1">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Выберите дату и время</h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="reservationDate" class="form-label">Дата *</label>
+                                <input type="date" class="form-control" id="reservationDate" min="{{ today }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="guestsCount" class="form-label">Количество гостей *</label>
+                                <select class="form-select" id="guestsCount">
+                                    <option value="1">1 человек</option>
+                                    <option value="2">2 человека</option>
+                                    <option value="3">3 человека</option>
+                                    <option value="4" selected>4 человека</option>
+                                    <option value="5">5 человек</option>
+                                    <option value="6">6 человек</option>
+                                    <option value="7">7+ человек</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">Доступное время</h5>
+                        <div class="row" id="timeSlots">
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    12:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    13:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2 bg-secondary text-white">
+                                    14:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    15:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    16:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2 bg-secondary text-white">
+                                    17:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    18:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    19:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    20:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2 bg-secondary text-white">
+                                    21:00
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-3 mb-2">
+                                <div class="card time-slot text-center p-2">
+                                    22:00
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button class="btn btn-primary" onclick="showStep(2)">Продолжить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шаг 2: Выбор столика -->
+    <div class="confirmation-step" id="step2">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Выберите столик</h3>
+                        <p class="text-muted">Доступные столики на <span id="selectedDateTime">17 июня, 19:00</span> для <span id="selectedGuests">4 гостей</span></p>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3">
+                                    <h5>Столик 1</h5>
+                                    <p class="text-muted">У окна</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Доступен</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 4 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3">
+                                    <h5>Столик 2</h5>
+                                    <p class="text-muted">В центре</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Доступен</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 6 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3 disabled">
+                                    <h5>Столик 3</h5>
+                                    <p class="text-muted">У камина</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-danger">Занят</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 2 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3">
+                                    <h5>Столик 4</h5>
+                                    <p class="text-muted">В уединении</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Доступен</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 4 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3">
+                                    <h5>VIP 1</h5>
+                                    <p class="text-muted">Отдельная комната</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Доступен</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 8 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3 disabled">
+                                    <h5>VIP 2</h5>
+                                    <p class="text-muted">Отдельная комната</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-danger">Занят</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 10 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3">
+                                    <h5>Столик 5</h5>
+                                    <p class="text-muted">На террасе</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Доступен</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 4 человек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="card table-card text-center p-3">
+                                    <h5>Столик 6</h5>
+                                    <p class="text-muted">На террасе</p>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Доступен</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">до 4 человек</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-outline-secondary" onclick="showStep(1)">Назад</button>
+                            <button class="btn btn-primary" onclick="showStep(3)">Продолжить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шаг 3: Ваши данные -->
+    <div class="confirmation-step" id="step3">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Ваши данные</h3>
+                        
+                        <form id="reservationForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="clientName" class="form-label">Имя *</label>
+                                    <input type="text" class="form-control" id="clientName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="clientPhone" class="form-label">Телефон *</label>
+                                    <input type="tel" class="form-control" id="clientPhone" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="clientEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="clientEmail">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="specialRequests" class="form-label">Особые пожелания</label>
+                                <textarea class="form-control" id="specialRequests" rows="3" placeholder="Аллергии, праздник, особые требования..."></textarea>
+                            </div>
+                            
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="agreement" required>
+                                <label class="form-check-label" for="agreement">
+                                    Я соглашаюсь с правилами бронирования и обработкой персональных данных
+                                </label>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" onclick="showStep(2)">Назад</button>
+                                <button type="button" class="btn btn-primary" onclick="showStep(4)">Забронировать</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шаг 4: Подтверждение -->
+    <div class="confirmation-step" id="step4">
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                        </div>
+                        <h3 class="card-title mb-3">Бронирование подтверждено!</h3>
+                        <p class="text-muted mb-4">Мы отправили детали бронирования на вашу почту</p>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5>Детали бронирования</h5>
+                                <div class="info-item">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>17 июня 2024, 19:00</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-people"></i>
+                                    <span>4 гостя</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Столик 2 (В центре)</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>Иван Иванов</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-muted small mb-4">
+                            Пожалуйста, приходите за 10-15 минут до назначенного времени.<br>
+                            При отмене бронирования просим сообщить заранее.
+                        </p>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'restaurant:restaurant_detail' %}" class="btn btn-primary">Вернуться на главную</a>
+                            <a href="#" class="btn btn-outline-secondary">Добавить в календарь</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Информация о бронировании -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Правила бронирования</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-clock-history text-primary me-3 fs-4"></i>
+                                <div>
+                                    <h5>Время прибытия</h5>
+                                    <p class="text-muted">Пожалуйста, приходите вовремя. Мы храним столик в течение 15 минут после назначенного времени.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-x-circle text-primary me-3 fs-4"></i>
+                                <div>
+                                    <h5>Отмена брони</h5>
+                                    <p class="text-muted">Вы можете отменить бронь бесплатно за 2 часа до визита.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <i class="bi bi-credit-card text-primary me-3 fs-4"></i>
+                                <div>
+                                    <h5>Предоплата</h5>
+                                    <p class="text-muted">Для компаний от 8 человек требуется предоплата 20% от суммы счета.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Текущая дата для ограничения выбора
+    document.getElementById('reservationDate').min = new Date().toISOString().split('T')[0];
+    
+    // Функция переключения между шагами
+    function showStep(stepNumber) {
+        document.querySelectorAll('.confirmation-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById('step' + stepNumber).classList.add('active');
+        
+        // Обновление индикатора прогресса
+        document.querySelectorAll('.progress-divider').forEach((divider, index) => {
+            if (index < stepNumber - 1) {
+                divider.classList.add('bg-primary');
+            } else {
+                divider.classList.remove('bg-primary');
+            }
+        });
+        
+        document.querySelectorAll('.badge.rounded-circle').forEach((badge, index) => {
+            if (index < stepNumber) {
+                badge.classList.add('bg-primary');
+                badge.classList.remove('bg-secondary');
+            } else {
+                badge.classList.remove('bg-primary');
+                badge.classList.add('bg-secondary');
+            }
+        });
+    }
+    
+    // Выбор времени
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.addEventListener('click', function() {
+            if (!this.classList.contains('bg-secondary')) {
+                document.querySelectorAll('.time-slot').forEach(s => {
+                    s.classList.remove('bg-primary', 'text-white');
+                });
+                this.classList.add('bg-primary', 'text-white');
+            }
+        });
+    });
+    
+    // Выбор столика
+    document.querySelectorAll('.table-card:not(.disabled)').forEach(table => {
+        table.addEventListener('click', function() {
+            document.querySelectorAll('.table-card').forEach(t => {
+                t.classList.remove('selected');
+            });
+            this.classList.add('selected');
+        });
+    });
+</script>
+{% endblock %}

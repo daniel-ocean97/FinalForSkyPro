@@ -27,3 +27,19 @@ def contacts(request):
 def about(request):
     restaurant = Restaurant.objects.first()
     return render(request, 'restaurant/about.html', {'restaurant': restaurant})
+
+from django.utils import timezone
+
+def reservation(request):
+    restaurant = Restaurant.objects.first()
+    today = timezone.now().date()
+    
+    if request.method == 'POST':
+        # Обработка формы бронирования
+        # Здесь будет логика сохранения бронирования в базу данных
+        pass
+    
+    return render(request, 'restaurant/reservation.html', {
+        'restaurant': restaurant,
+        'today': today
+    })

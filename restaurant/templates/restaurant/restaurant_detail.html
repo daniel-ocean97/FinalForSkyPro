@@ -13,7 +13,7 @@
     <div class="container text-center">
         <h1 class="display-4 fw-bold mb-4">{{ restaurant.name }}</h1>
         <p class="lead mb-4">Искусство гастрономии в каждом блюде</p>
-        <a href="#" class="btn btn-primary btn-lg">Забронировать стол</a>
+        <a href="{% url 'restaurant:reservation' %}" class="btn btn-primary btn-lg">Забронировать стол</a>
         <a href="#" class="btn btn-primary btn-lg">Забронировать зал</a>
     </div>
 </section>
@@ -72,7 +72,7 @@
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex">
-                        <a href="#" class="btn btn-primary me-md-2">
+                        <a href="{% url 'restaurant:reservation' %}" class="btn btn-primary me-md-2">
                             <i class="bi bi-calendar-check me-2"></i>Забронировать стол
                         </a>
                         <a href="#" class="btn btn-outline-secondary">
