@@ -1,0 +1,7 @@
+__pycache__
+db.sqlite3
+uv.lock
+.python-version
+.venv
+.env
+media
