@@ -52,6 +52,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+SESSION_COOKIE_AGE = 1209600  # время жизни сессии в секундах (2 недели)
+SESSION_COOKIE_SECURE = False  # True для HTTPS в продакшене
+SESSION_COOKIE_HTTPONLY = True  # защита от XSS-атак
+
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False  # False позволяет JavaScript читать CSRF-токен
+
 ROOT_URLCONF = 'myproject.urls'
 
 TEMPLATES = [
