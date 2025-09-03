@@ -39,7 +39,39 @@ class Table(models.Model):
     capacity = models.IntegerField(verbose_name="Вместимость")
     description = models.CharField(max_length=255, blank=True, verbose_name="Описание")
     is_active = models.BooleanField(default=True, verbose_name="Активный")
-    
+
+    def is_available(self, date, time):
+        """Проверяет, свободен ли столик в указанные дату и время"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        print(f"Checking availability for table {self.number} on {date} at {time}")
+        
+        # Преобразуем время в объект datetime для сравнения
+        datetime_selected = timezone.make_aware(
+            timezone.datetime.combine(date, time)
+        )
+        
+        # Проверяем бронирования на этот столик в выбранное время ±2 часа
+        reservations = Reservation.objects.filter(
+            table=self,
+            date=date,
+            status__in=['pending', 'confirmed']
+        ).exclude(status='cancelled')
+        
+        for reservation in reservations:
+            reservation_time = timezone.make_aware(
+                timezone.datetime.combine(reservation.date, reservation.time)
+            )
+            time_diff = abs((reservation_time - datetime_selected).total_seconds())
+            
+            # Если время бронирования пересекается с выбранным временем
+            if time_diff < 7200:  # 2 часа
+                print(f"Table {self.number} is NOT available")
+                return False
+        
+        return True
+        
     def __str__(self):
         return f"Столик {self.number} ({self.capacity} чел.)"
 

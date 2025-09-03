@@ -60,6 +60,7 @@ SESSION_COOKIE_HTTPONLY = True  # защита от XSS-атак
 
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False  # False позволяет JavaScript читать CSRF-токен
+SESSION_SAVE_EVERY_REQUEST = True
 
 ROOT_URLCONF = 'myproject.urls'
 

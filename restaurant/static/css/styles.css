@@ -269,3 +269,87 @@ footer {
     background-size: cover;
     background-position: center;
 }
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(193, 154, 107, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+
+.form-control.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+.table-card:not(.disabled) {
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.table-card:not(.disabled):hover {
+    border: 2px solid #28a745;
+    transform: translateY(-2px);
+}
+
+.table-card.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.table-card.selected {
+    border: 3px solid #007bff !important;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+}
+
+/* Стили для доступных столиков */
+.table-card[data-available="True"] {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.table-card[data-available="True"]:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-color: #28a745;
+}
+
+/* Стили для занятых столиков */
+.table-card[data-available="False"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+
+/* Стиль для выбранного столика */
+.table-card.selected {
+    border: 3px solid #007bff !important;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+    transform: translateY(-5px);
+}
+
+/* Баджи */
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+}

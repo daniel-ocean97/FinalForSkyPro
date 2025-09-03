@@ -5,6 +5,7 @@
 {% block title %}Бронирование - {{ restaurant.name }}{% endblock %}
 
 {% block extra_css %}
+
 <style>
     .time-slot {
         transition: all 0.3s ease;
@@ -158,10 +159,11 @@
                         {{ step2_form.table }}
                         
                         <div class="row mt-4">
-                            {% for table in step2_form.fields.table.queryset %}
+                            {% for table in tables_with_availability %}
                             <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3 {% if not table.available %}disabled{% endif %}" 
-                                     data-table-id="{{ table.id }}">
+                                <div class="card table-card text-center p-3" 
+                                    data-table-id="{{ table.id }}"
+                                    data-available="{{ table.available|yesno:"true,false" }}">
                                     <h5>Столик {{ table.number }}</h5>
                                     <p class="text-muted">{{ table.description }}</p>
                                     <div class="mt-2">
@@ -170,8 +172,12 @@
                                         </span>
                                     </div>
                                     <p class="mt-2 mb-0">до {{ table.capacity }} человек</p>
+                                    <!-- Отладочная информация -->
+                                    <small class="text-muted">Available: {{ table.available }}</small>
                                 </div>
                             </div>
+                            {% empty %}
+                            <p>Нет доступных столиков для выбранных параметров</p>
                             {% endfor %}
                         </div>
                         
@@ -362,8 +368,49 @@ function getCookie(name) {
 }
 
 const csrftoken = getCookie('csrftoken');
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initializePage();
+});
+
+function initializePage() {
+    // Загружаем временные слоты при загрузке страницы
+    const date = document.getElementById('id_date').value;
+    const guests = document.getElementById('id_guests_count').value;
+    if (date && guests) {
+        loadAvailableTimes(date, guests);
+    }
+    
+    // Привязываем обработчики для столиков
+    bindTableEvents();
+    
+    // Привязываем обработчики для временных слотов
+    bindTimeSlotEvents();
+    
+    // Код для визуальной обратной связи для столиков
+    document.querySelectorAll('.table-card[data-available="True"]').forEach(table => {
+        table.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+        });
+        
+        table.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            }
+        });
+    });
+}
+
 // Функция для загрузки доступных временных слотов
 function loadAvailableTimes(date, guestsCount) {
+    if (!date || !guestsCount) {
+        console.error('Missing date or guests count');
+        return;
+    }
+    
     const formData = new FormData();
     formData.append('date', date);
     formData.append('guests_count', guestsCount);
@@ -376,18 +423,29 @@ function loadAvailableTimes(date, guestsCount) {
             'X-CSRFToken': csrftoken
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        if (data.error) {
+            console.error('Server error:', data.error);
+            return;
+        }
         if (data.available_hours) {
             updateTimeSlots(data.available_hours);
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error loading available times:', error));
 }
 
 // Функция для обновления отображения временных слотов
 function updateTimeSlots(hours) {
     const timeSlotsContainer = document.getElementById('timeSlots');
+    if (!timeSlotsContainer) return;
+    
     timeSlotsContainer.innerHTML = '';
     
     hours.forEach(hour => {
@@ -423,6 +481,38 @@ function bindTimeSlotEvents() {
     });
 }
 
+// Функция для привязки обработчиков событий к столикам
+function bindTableEvents() {
+    console.log('Binding table events...');
+    console.log('Total tables found:', document.querySelectorAll('.table-card').length);
+    
+    document.querySelectorAll('.table-card').forEach(table => {
+        console.log('Table ID:', table.dataset.tableId, 
+                   'Data available:', table.dataset.available,
+                   'Type:', typeof table.dataset.available);
+        
+        table.addEventListener('click', function() {
+            console.log('Clicked - Available value:', this.dataset.available, 'Type:', typeof this.dataset.available);
+            console.log('Strict comparison with "true":', this.dataset.available === 'true');
+            console.log('Loose comparison with true:', this.dataset.available == true);
+            
+            if (this.dataset.available === 'true') {
+                console.log('Table is available, proceeding...');
+                document.querySelectorAll('.table-card').forEach(t => {
+                    t.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                document.getElementById('id_table').value = this.dataset.tableId;
+                console.log('Selected table:', this.dataset.tableId);
+            } else {
+                console.log('Table is not available:', this.dataset.tableId);
+                alert('Этот столик занят. Пожалуйста, выберите другой.');
+            }
+        });
+    });
+}
+
 // Загружаем временные слоты при изменении даты или количества гостей
 document.getElementById('id_date').addEventListener('change', function() {
     const date = this.value;
@@ -438,42 +528,6 @@ document.getElementById('id_guests_count').addEventListener('change', function()
     if (date && guests) {
         loadAvailableTimes(date, guests);
     }
-});
-
-// Загружаем временные слоты при загрузке страницы, если есть значения по умолчанию
-document.addEventListener('DOMContentLoaded', function() {
-    const date = document.getElementById('id_date').value;
-    const guests = document.getElementById('id_guests_count').value;
-    if (date && guests) {
-        loadAvailableTimes(date, guests);
-    }
-});
-// Выбор времени
-document.querySelectorAll('.time-slot').forEach(slot => {
-    slot.addEventListener('click', function() {
-        if (!this.classList.contains('bg-secondary')) {
-            document.querySelectorAll('.time-slot').forEach(s => {
-                s.classList.remove('bg-primary', 'text-white');
-            });
-            this.classList.add('bg-primary', 'text-white');
-            
-            // Сохраняем выбранное время в скрытое поле
-            document.getElementById('id_time').value = this.dataset.time;
-        }
-    });
-});
-
-// Выбор столика
-document.querySelectorAll('.table-card:not(.disabled)').forEach(table => {
-    table.addEventListener('click', function() {
-        document.querySelectorAll('.table-card').forEach(t => {
-            t.classList.remove('selected');
-        });
-        this.classList.add('selected');
-        
-        // Сохраняем выбранный столик в скрытое поле
-        document.getElementById('id_table').value = this.dataset.tableId;
-    });
 });
 
 // Обновляем информацию о выбранной дате и количестве гостей
@@ -516,13 +570,22 @@ function submitStep1() {
             'X-CSRFToken': csrftoken
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showStep(2);
         } else {
             alert('Ошибки: ' + JSON.stringify(data.errors));
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке формы');
     });
 }
 
@@ -545,19 +608,35 @@ function submitStep2() {
             'X-CSRFToken': csrftoken
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showStep(3);
         } else {
             alert('Ошибки: ' + JSON.stringify(data.errors));
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке формы');
     });
 }
 
 // Обработка формы шага 3
 document.getElementById('step3Form').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // Проверяем соглашение
+    const agreement = document.getElementById('agreement');
+    if (!agreement.checked) {
+        alert('Пожалуйста, согласитесь с правилами бронирования');
+        return;
+    }
     
     const formData = new FormData(this);
     
@@ -569,7 +648,12 @@ document.getElementById('step3Form').addEventListener('submit', function(e) {
             'X-CSRFToken': csrftoken
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Заполняем модальное окно данными
@@ -595,6 +679,10 @@ document.getElementById('step3Form').addEventListener('submit', function(e) {
         } else {
             alert('Ошибки: ' + JSON.stringify(data.errors));
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке формы');
     });
 });
 

@@ -56,53 +56,90 @@ def reservation(request):
                 return JsonResponse({'success': False, 'errors': form.errors.get_json_data()})
                 
         elif step == '2':
+            # Получаем данные из сессии
+            reservation_data = request.session.get('reservation_data', {})
+            
+            # Фильтруем столики по количеству гостей
+            tables = Table.objects.filter(capacity__gte=reservation_data.get('guests_count', 1))
+            
+            # Создаем форму с правильным queryset
             form = ReservationStep2Form(request.POST)
+            form.fields['table'].queryset = tables
+            
             if form.is_valid():
-                request.session['reservation_data']['table'] = form.cleaned_data['table'].id
+                # Сохраняем ID столика в сессии
+                reservation_data = request.session.get('reservation_data', {})
+                reservation_data['table'] = form.cleaned_data['table'].id  # Сохраняем ID
+                request.session['reservation_data'] = reservation_data  # Обновляем сессию
+                
+                print(f"Saved table ID to session: {reservation_data['table']}")
                 return JsonResponse({'success': True})
             else:
-                return JsonResponse({'success': False, 'errors': form.errors})
-                
+                return JsonResponse({'success': False, 'errors': form.errors.get_json_data()})
         elif step == '3':
             form = ReservationStep3Form(request.POST)
             if form.is_valid():
                 # Создаем бронирование
                 reservation_data = request.session.get('reservation_data', {})
+                print(f"Reservation data from session: {reservation_data}")
+                
                 reservation = form.save(commit=False)
-                reservation.table_id = reservation_data.get('table')
-                reservation.date = reservation_data.get('date')
-                reservation.time = reservation_data.get('time')
+                reservation.table_id = reservation_data.get('table')  # Должен быть ID столика
+                
+                # Проверяем, что table_id есть
+                if not reservation.table_id:
+                    return JsonResponse({'success': False, 'errors': {'__all__': ['Table not selected']}})
+                
+                reservation.date = datetime.datetime.strptime(reservation_data.get('date'), '%Y-%m-%d').date()
+                reservation.time = datetime.datetime.strptime(reservation_data.get('time'), '%H:%M:%S').time()
                 reservation.guests_count = reservation_data.get('guests_count')
-                reservation.save()
                 
-                # Очищаем сессию
-                request.session.pop('reservation_data', None)
-                
-                return JsonResponse({
-                    'success': True,
-                    'reservation': {
-                        'date': reservation.date.strftime('%Y-%m-%d'),
-                        'time': reservation.time.strftime('%H:%M'),
-                        'guests_count': reservation.guests_count,
-                        'table_number': reservation.table.number,
-                        'table_description': reservation.table.description,
-                        'client_name': reservation.client_name,
-                        'client_phone': reservation.client_phone,
-                        'client_email': reservation.client_email,
-                        'special_requests': reservation.special_requests,
-                    }
-                })
+                try:
+                    reservation.save()
+                    # Очищаем сессию
+                    request.session.pop('reservation_data', None)
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'reservation': {
+                            'date': reservation.date.strftime('%Y-%m-%d'),
+                            'time': reservation.time.strftime('%H:%M'),
+                            'guests_count': reservation.guests_count,
+                            'table_number': reservation.table.number,
+                            'table_description': reservation.table.description,
+                            'client_name': reservation.client_name,
+                            'client_phone': reservation.client_phone,
+                            'client_email': reservation.client_email,
+                            'special_requests': reservation.special_requests,
+                        }
+                    })
+                except Exception as e:
+                    return JsonResponse({'success': False, 'errors': {'__all__': [str(e)]}})
             else:
-                return JsonResponse({'success': False, 'errors': form.errors})
+                return JsonResponse({'success': False, 'errors': form.errors.get_json_data()})
+    else:
+        step2_form = ReservationStep2Form()
+        reservation_data = request.session.get('reservation_data', {})
     
-    # GET request - показываем форму
-    # Для шага 2 нужно динамически установить queryset для выбора столиков
-    step2_form = ReservationStep2Form()
-    reservation_data = request.session.get('reservation_data', {})
+    tables_with_availability = []  # Создаем пустой список по умолчанию
     
     if reservation_data:
-        # Фильтруем столики по количеству гостей и доступности
+        # Фильтруем столики по количеству гостей
         tables = Table.objects.filter(capacity__gte=reservation_data.get('guests_count', 1))
+        
+        # Добавляем информацию о доступности к каждому столику
+        try:
+            selected_date = datetime.datetime.strptime(reservation_data.get('date'), '%Y-%m-%d').date()
+            selected_time = datetime.datetime.strptime(reservation_data.get('time'), '%H:%M:%S').time()
+            
+            for table in tables:
+                table.available = table.is_available(selected_date, selected_time)
+                tables_with_availability.append(table)
+                
+        except (ValueError, TypeError):
+            # Если не удалось распарсить дату/время, оставляем список пустым
+            pass
+        
         step2_form.fields['table'].queryset = tables
     
     return render(request, 'restaurant/reservation.html', {
@@ -110,7 +147,8 @@ def reservation(request):
         'today': today,
         'step1_form': ReservationStep1Form(),
         'step2_form': step2_form,
-        'step3_form': ReservationStep3Form()
+        'step3_form': ReservationStep3Form(),
+        'tables_with_availability': tables_with_availability  # Добавляем в контекст
     })
 
 @csrf_exempt
@@ -146,35 +184,44 @@ def get_available_times(request):
             status__in=['pending', 'confirmed']
         )
         
-        # Создаем множество занятых временных слотов
-        busy_slots = set()
+        # Создаем словарь занятых столиков по времени
+        # Ключ: время (str), Значение: set() занятых столиков в это время
+        busy_tables_by_time = {}
+        
         for reservation in active_reservations:
-            # Добавляем время бронирования в занятые слоты
-            busy_slots.add(reservation.time.strftime('%H:%M'))
+            time_str = reservation.time.strftime('%H:%M')
+            if time_str not in busy_tables_by_time:
+                busy_tables_by_time[time_str] = set()
+            busy_tables_by_time[time_str].add(reservation.table_id)
             
-            # Если бронирование длится 2 часа, добавляем следующий час
-            # (замените эту логику, если у вас есть поле длительности)
+            # Также учитываем следующий час (если бронирование на 2 часа)
             next_hour = (datetime.datetime.combine(selected_date, reservation.time) + 
                         datetime.timedelta(hours=1)).time()
-            busy_slots.add(next_hour.strftime('%H:%M'))
+            next_hour_str = next_hour.strftime('%H:%M')
+            if next_hour_str not in busy_tables_by_time:
+                busy_tables_by_time[next_hour_str] = set()
+            busy_tables_by_time[next_hour_str].add(reservation.table_id)
         
         available_hours = []
         current_slot = opening_time
         
         # Проверяем каждый временной слот
         while current_slot < closing_time:
+            slot_str = current_slot.strftime('%H:%M')
+            
             # Если дата сегодня и текущий слот уже прошел, пропускаем
             if selected_date == today and current_slot < current_time:
                 available_hours.append({
-                    'time': current_slot.strftime('%H:%M'),
+                    'time': slot_str,
                     'available': False
                 })
             else:
                 # Проверяем, есть ли свободные столики для этого временного слота
-                slot_str = current_slot.strftime('%H:%M')
+                busy_tables = busy_tables_by_time.get(slot_str, set())
                 
-                # Если слот занят в любом столике, отмечаем как недоступный
-                is_available = slot_str not in busy_slots
+                # Доступно, если есть хотя бы один столик, который не занят в это время
+                available_tables = tables.exclude(id__in=busy_tables)
+                is_available = available_tables.exists()
                 
                 available_hours.append({
                     'time': slot_str,
