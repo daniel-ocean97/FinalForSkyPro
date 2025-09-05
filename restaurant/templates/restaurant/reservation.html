@@ -1,19 +1,22 @@
 <!-- restaurant/templates/restaurant/reservation.html -->
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filter %}
 
 {% block title %}Бронирование - {{ restaurant.name }}{% endblock %}
 
 {% block extra_css %}
-
 <style>
     .time-slot {
         transition: all 0.3s ease;
+        cursor: pointer;
     }
     
-    .time-slot:hover {
+    .time-slot:hover, .time-slot.selected {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        background-color: var(--accent-color) !important;
+        color: white !important;
     }
     
     .table-card {
@@ -30,20 +33,6 @@
     .table-card.disabled {
         opacity: 0.5;
         cursor: not-allowed;
-    }
-    
-    .confirmation-step {
-        display: none;
-    }
-    
-    .confirmation-step.active {
-        display: block;
-        animation: fadeIn 0.5s ease;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 {% endblock %}
@@ -71,21 +60,21 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-center flex-fill">
-                            <span class="badge bg-primary rounded-circle p-2 mb-2">1</span>
+                            <span class="badge {% if step == '1' %}bg-primary{% else %}bg-secondary{% endif %} rounded-circle p-2 mb-2">1</span>
                             <p class="mb-0 small">Выбор даты и времени</p>
                         </div>
                         <div class="flex-fill">
-                            <hr class="progress-divider">
+                            <hr class="progress-divider {% if step != '1' %}bg-primary{% endif %}">
                         </div>
                         <div class="text-center flex-fill">
-                            <span class="badge bg-secondary rounded-circle p-2 mb-2">2</span>
+                            <span class="badge {% if step == '2' %}bg-primary{% else %}bg-secondary{% endif %} rounded-circle p-2 mb-2">2</span>
                             <p class="mb-0 small">Выбор столика</p>
                         </div>
                         <div class="flex-fill">
-                            <hr class="progress-divider">
+                            <hr class="progress-divider {% if step == '3' or show_success_modal %}bg-primary{% endif %}">
                         </div>
                         <div class="text-center flex-fill">
-                            <span class="badge bg-secondary rounded-circle p-2 mb-2">3</span>
+                            <span class="badge {% if step == '3' %}bg-primary{% else %}bg-secondary{% endif %} rounded-circle p-2 mb-2">3</span>
                             <p class="mb-0 small">Ваши данные</p>
                         </div>
                     </div>
@@ -94,31 +83,45 @@
         </div>
     </div>
 
+    <!-- Сообщения об ошибках -->
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Шаг 1: Выбор даты и времени -->
-<div class="confirmation-step active" id="step1">
+    {% if step == '1' %}
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title mb-4">Выберите дату и время</h3>
                     
-                    <form id="step1Form">
+                    <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="step" value="1">
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ step1_form.date.id_for_label }}" class="form-label">Дата *</label>
-                                {{ step1_form.date }}
+                                <label for="reservationDate" class="form-label">Дата *</label>
+                                {{ form.date }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="{{ step1_form.guests_count.id_for_label }}" class="form-label">Количество гостей *</label>
-                                {{ step1_form.guests_count }}
+                                <label for="guestsCount" class="form-label">Количество гостей *</label>
+                                {{ form.guests_count }}
                             </div>
                         </div>
                         
                         <!-- Скрытое поле для времени -->
-                        {{ step1_form.time }}
+                        {{ form.time }}
                         
                         <h5 class="mt-4 mb-3">Доступное время</h5>
                         <div class="row" id="timeSlots">
@@ -133,37 +136,40 @@
                         </div>
                         
                         <div class="d-grid gap-2 mt-4">
-                            <button type="button" class="btn btn-primary" onclick="submitStep1()">Продолжить</button>
+                            <button type="submit" class="btn btn-primary">Продолжить</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Шаг 2: Выбор столика -->
-<div class="confirmation-step" id="step2">
+    <!-- Шаг 2: Выбор столика -->
+    {% elif step == '2' %}
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title mb-4">Выберите столик</h3>
-                    <p class="text-muted">Доступные столики на <span id="selectedDateTime"></span> для <span id="selectedGuests"></span></p>
+                    <p class="text-muted">Доступные столики на 
+                        <span id="selectedDateTime">
+                            {{ reservation_data.date|date:"d E" }}, {{ reservation_data.time }}
+                        </span> 
+                        для <span id="selectedGuests">{{ reservation_data.guests_count }} гостей</span>
+                    </p>
                     
-                    <form id="step2Form">
+                    <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="step" value="2">
                         
                         <!-- Скрытое поле для столика -->
-                        {{ step2_form.table }}
+                        {{ form.table }}
                         
                         <div class="row mt-4">
-                            {% for table in tables_with_availability %}
+                            {% for table in form.fields.table.queryset %}
                             <div class="col-md-3 mb-4">
-                                <div class="card table-card text-center p-3" 
-                                    data-table-id="{{ table.id }}"
-                                    data-available="{{ table.available|yesno:"true,false" }}">
+                                <div class="card table-card text-center p-3 {% if not table.available %}disabled{% endif %}" 
+                                     data-table-id="{{ table.id }}">
                                     <h5>Столик {{ table.number }}</h5>
                                     <p class="text-muted">{{ table.description }}</p>
                                     <div class="mt-2">
@@ -172,57 +178,57 @@
                                         </span>
                                     </div>
                                     <p class="mt-2 mb-0">до {{ table.capacity }} человек</p>
-                                    <!-- Отладочная информация -->
-                                    <small class="text-muted">Available: {{ table.available }}</small>
                                 </div>
                             </div>
-                            {% empty %}
-                            <p>Нет доступных столиков для выбранных параметров</p>
                             {% endfor %}
                         </div>
                         
                         <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-outline-secondary" onclick="showStep(1)">Назад</button>
-                            <button type="button" class="btn btn-primary" onclick="submitStep2()">Продолжить</button>
+                            <a href="{% url 'restaurant:reservation' %}?step=1" class="btn btn-outline-secondary">Назад</a>
+                            <button type="submit" class="btn btn-primary">Продолжить</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Шаг 3: Ваши данные -->
-<div class="confirmation-step" id="step3">
+    <!-- Шаг 3: Ваши данные -->
+    {% elif step == '3' %}
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title mb-4">Ваши данные</h3>
+                    <p class="text-muted">Бронирование на 
+                        <span>{{ reservation_data.date|date:"d E" }}, {{ reservation_data.time }}</span> 
+                        для <span>{{ reservation_data.guests_count }} гостей</span>,
+                        столик <span id="selectedTableNumber"></span>
+                    </p>
                     
-                    <form id="step3Form">
+                    <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="step" value="3">
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ step3_form.client_name.id_for_label }}" class="form-label">Имя *</label>
-                                {{ step3_form.client_name }}
+                                <label for="clientName" class="form-label">Имя *</label>
+                                {{ form.client_name }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="{{ step3_form.client_phone.id_for_label }}" class="form-label">Телефон *</label>
-                                {{ step3_form.client_phone }}
+                                <label for="clientPhone" class="form-label">Телефон *</label>
+                                {{ form.client_phone }}
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="{{ step3_form.client_email.id_for_label }}" class="form-label">Email</label>
-                            {{ step3_form.client_email }}
+                            <label for="clientEmail" class="form-label">Email</label>
+                            {{ form.client_email }}
                         </div>
                         
                         <div class="mb-3">
-                            <label for="{{ step3_form.special_requests.id_for_label }}" class="form-label">Особые пожелания</label>
-                            {{ step3_form.special_requests }}
+                            <label for="specialRequests" class="form-label">Особые пожелания</label>
+                            {{ form.special_requests }}
                         </div>
                         
                         <div class="form-check mb-4">
@@ -233,7 +239,7 @@
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary" onclick="showStep(2)">Назад</button>
+                            <a href="{% url 'restaurant:reservation' %}?step=2" class="btn btn-outline-secondary">Назад</a>
                             <button type="submit" class="btn btn-primary">Забронировать</button>
                         </div>
                     </form>
@@ -241,6 +247,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <!-- Модальное окно подтверждения -->
@@ -263,32 +270,36 @@
                         <h5 class="text-center">Детали бронирования</h5>
                         <div class="info-item">
                             <i class="bi bi-calendar-event"></i>
-                            <span id="modalDate"></span>
+                            <span id="modalDate">{{ last_reservation.date }} {{ last_reservation.time }}</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-people"></i>
-                            <span id="modalGuests"></span>
+                            <span id="modalGuests">{{ last_reservation.guests_count }} гостя</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-geo-alt"></i>
-                            <span id="modalTable"></span>
+                            <span id="modalTable">Столик {{ last_reservation.table_number }} ({{ last_reservation.table_description }})</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-person"></i>
-                            <span id="modalName"></span>
+                            <span id="modalName">{{ last_reservation.client_name }}</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-telephone"></i>
-                            <span id="modalPhone"></span>
+                            <span id="modalPhone">{{ last_reservation.client_phone }}</span>
                         </div>
-                        <div class="info-item" id="modalEmailContainer" style="display: none;">
+                        {% if last_reservation.client_email %}
+                        <div class="info-item">
                             <i class="bi bi-envelope"></i>
-                            <span id="modalEmail"></span>
+                            <span id="modalEmail">{{ last_reservation.client_email }}</span>
                         </div>
-                        <div class="info-item" id="modalRequestsContainer" style="display: none;">
+                        {% endif %}
+                        {% if last_reservation.special_requests %}
+                        <div class="info-item">
                             <i class="bi bi-chat-text"></i>
-                            <span id="modalRequests"></span>
+                            <span id="modalRequests">{{ last_reservation.special_requests }}</span>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -348,369 +359,123 @@
 </div>
 
 <script>
-// Текущая дата для ограничения выбора
-document.getElementById('id_date').min = new Date().toISOString().split('T')[0];
+    // Обновление доступного времени при изменении даты или количества гостей
+    document.getElementById('reservationDate').addEventListener('change', updateAvailableTimes);
+    document.getElementById('guestsCount').addEventListener('change', updateAvailableTimes);
 
-// Функция для получения CSRF токена
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-const csrftoken = getCookie('csrftoken');
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    initializePage();
-});
-
-function initializePage() {
-    // Загружаем временные слоты при загрузке страницы
-    const date = document.getElementById('id_date').value;
-    const guests = document.getElementById('id_guests_count').value;
-    if (date && guests) {
-        loadAvailableTimes(date, guests);
-    }
+    function updateAvailableTimes() {
+    const date = document.getElementById('reservationDate').value;
+    const guests = document.getElementById('guestsCount').value;
     
-    // Привязываем обработчики для столиков
-    bindTableEvents();
-    
-    // Привязываем обработчики для временных слотов
-    bindTimeSlotEvents();
-    
-    // Код для визуальной обратной связи для столиков
-    document.querySelectorAll('.table-card[data-available="True"]').forEach(table => {
-        table.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
-            this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
-        });
-        
-        table.addEventListener('mouseleave', function() {
-            if (!this.classList.contains('selected')) {
-                this.style.transform = '';
-                this.style.boxShadow = '';
-            }
-        });
-    });
-}
-
-// Функция для загрузки доступных временных слотов
-function loadAvailableTimes(date, guestsCount) {
-    if (!date || !guestsCount) {
-        console.error('Missing date or guests count');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('date', date);
-    formData.append('guests_count', guestsCount);
+    if (!date) return;
     
     fetch('{% url "restaurant:get_available_times" %}', {
         method: 'POST',
-        body: formData,
         headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrftoken
-        }
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `date=${date}&guests_count=${guests}`
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        if (data.error) {
-            console.error('Server error:', data.error);
-            return;
-        }
-        if (data.available_hours) {
-            updateTimeSlots(data.available_hours);
-        }
-    })
-    .catch(error => console.error('Error loading available times:', error));
-}
-
-// Функция для обновления отображения временных слотов
-function updateTimeSlots(hours) {
-    const timeSlotsContainer = document.getElementById('timeSlots');
-    if (!timeSlotsContainer) return;
-    
-    timeSlotsContainer.innerHTML = '';
-    
-    hours.forEach(hour => {
-        const timeSlot = document.createElement('div');
-        timeSlot.className = 'col-4 col-sm-3 mb-2';
-        timeSlot.innerHTML = `
-            <div class="card time-slot text-center p-2 ${hour.available ? '' : 'bg-secondary text-white'}" 
-                 data-time="${hour.time}">
-                ${hour.time}
-            </div>
-        `;
-        timeSlotsContainer.appendChild(timeSlot);
+        const timeSlotsContainer = document.getElementById('timeSlots');
+        timeSlotsContainer.innerHTML = '';
+        
+        data.available_hours.forEach(hour => {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-sm-3 mb-2';
+            
+            const card = document.createElement('div');
+            card.className = `card time-slot text-center p-2 ${hour.available ? '' : 'bg-secondary text-white'}`;
+            card.dataset.time = hour.time;
+            card.textContent = hour.time;
+            
+            if (hour.available) {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    document.getElementById('id_time').value = this.dataset.time;
+                });
+            }
+            
+            col.appendChild(card);
+            timeSlotsContainer.appendChild(col);
+        });
     });
-    
-    // Перепривязываем обработчики событий к новым элементам
-    bindTimeSlotEvents();
 }
-
-// Функция для привязки обработчиков событий к временным слотам
-function bindTimeSlotEvents() {
+    // Текущая дата для ограничения выбора
+    document.getElementById('reservationDate').min = new Date().toISOString().split('T')[0];
+    
+    // Выбор времени
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.addEventListener('click', function() {
             if (!this.classList.contains('bg-secondary')) {
                 document.querySelectorAll('.time-slot').forEach(s => {
-                    s.classList.remove('bg-primary', 'text-white');
+                    s.classList.remove('selected');
                 });
-                this.classList.add('bg-primary', 'text-white');
+                this.classList.add('selected');
                 
                 // Сохраняем выбранное время в скрытое поле
                 document.getElementById('id_time').value = this.dataset.time;
             }
         });
     });
-}
-
-// Функция для привязки обработчиков событий к столикам
-function bindTableEvents() {
-    console.log('Binding table events...');
-    console.log('Total tables found:', document.querySelectorAll('.table-card').length);
     
-    document.querySelectorAll('.table-card').forEach(table => {
-        console.log('Table ID:', table.dataset.tableId, 
-                   'Data available:', table.dataset.available,
-                   'Type:', typeof table.dataset.available);
-        
+    // Выбор столика
+    document.querySelectorAll('.table-card:not(.disabled)').forEach(table => {
         table.addEventListener('click', function() {
-            console.log('Clicked - Available value:', this.dataset.available, 'Type:', typeof this.dataset.available);
-            console.log('Strict comparison with "true":', this.dataset.available === 'true');
-            console.log('Loose comparison with true:', this.dataset.available == true);
+            document.querySelectorAll('.table-card').forEach(t => {
+                t.classList.remove('selected');
+            });
+            this.classList.add('selected');
             
-            if (this.dataset.available === 'true') {
-                console.log('Table is available, proceeding...');
-                document.querySelectorAll('.table-card').forEach(t => {
-                    t.classList.remove('selected');
-                });
-                this.classList.add('selected');
-                
-                document.getElementById('id_table').value = this.dataset.tableId;
-                console.log('Selected table:', this.dataset.tableId);
-            } else {
-                console.log('Table is not available:', this.dataset.tableId);
-                alert('Этот столик занят. Пожалуйста, выберите другой.');
-            }
+            // Сохраняем выбранный столик в скрытое поле
+            document.getElementById('id_table').value = this.dataset.tableId;
+            
+            // Показываем номер выбранного столика на шаге 3
+            const tableNumber = this.querySelector('h5').textContent;
+            document.getElementById('selectedTableNumber').textContent = tableNumber.replace('Столик ', '');
         });
     });
-}
-
-// Загружаем временные слоты при изменении даты или количества гостей
-document.getElementById('id_date').addEventListener('change', function() {
-    const date = this.value;
-    const guests = document.getElementById('id_guests_count').value;
-    if (date && guests) {
-        loadAvailableTimes(date, guests);
-    }
-});
-
-document.getElementById('id_guests_count').addEventListener('change', function() {
-    const date = document.getElementById('id_date').value;
-    const guests = this.value;
-    if (date && guests) {
-        loadAvailableTimes(date, guests);
-    }
-});
-
-// Обновляем информацию о выбранной дате и количестве гостей
-document.getElementById('id_date').addEventListener('change', updateSelectionInfo);
-document.getElementById('id_guests_count').addEventListener('change', updateSelectionInfo);
-
-function updateSelectionInfo() {
-    const date = document.getElementById('id_date').value;
-    const guests = document.getElementById('id_guests_count').value;
     
-    if (date) {
-        const formattedDate = new Date(date).toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'long'
-        });
-        document.getElementById('selectedDateTime').textContent = formattedDate;
-    }
-    
-    if (guests) {
-        document.getElementById('selectedGuests').textContent = guests + ' гостей';
-    }
-}
-
-// Функция для отправки шага 1
-function submitStep1() {
-    const timeSlot = document.querySelector('.time-slot.bg-primary');
-    
-    if (!timeSlot) {
-        alert('Пожалуйста, выберите время');
-        return;
-    }
-    
-    const formData = new FormData(document.getElementById('step1Form'));
-    
-    fetch('{% url "restaurant:reservation" %}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrftoken
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showStep(2);
-        } else {
-            alert('Ошибки: ' + JSON.stringify(data.errors));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Произошла ошибка при отправке формы');
+    // Показываем модальное окно при успешном бронировании
+    {% if show_success_modal %}
+    document.addEventListener('DOMContentLoaded', function() {
+        var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+        reservationModal.show();
     });
-}
-
-// Функция для отправки шага 2
-function submitStep2() {
-    const selectedTable = document.querySelector('.table-card.selected');
+    {% endif %}
     
-    if (!selectedTable) {
-        alert('Пожалуйста, выберите столик');
-        return;
-    }
-    
-    const formData = new FormData(document.getElementById('step2Form'));
-    
-    fetch('{% url "restaurant:reservation" %}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrftoken
+    // Автоматически выбираем время и столик, если они уже были выбраны ранее
+    document.addEventListener('DOMContentLoaded', function() {
+        // Выбор времени
+        const selectedTime = '{{ reservation_data.time }}';
+        if (selectedTime) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                if (slot.dataset.time === selectedTime) {
+                    slot.classList.add('selected');
+                    document.getElementById('id_time').value = selectedTime;
+                }
+            });
         }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showStep(3);
-        } else {
-            alert('Ошибки: ' + JSON.stringify(data.errors));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Произошла ошибка при отправке формы');
-    });
-}
-
-// Обработка формы шага 3
-document.getElementById('step3Form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Проверяем соглашение
-    const agreement = document.getElementById('agreement');
-    if (!agreement.checked) {
-        alert('Пожалуйста, согласитесь с правилами бронирования');
-        return;
-    }
-    
-    const formData = new FormData(this);
-    
-    fetch('{% url "restaurant:reservation" %}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrftoken
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Заполняем модальное окно данными
-            document.getElementById('modalDate').textContent = data.reservation.date + ' ' + data.reservation.time;
-            document.getElementById('modalGuests').textContent = data.reservation.guests_count + ' гостя';
-            document.getElementById('modalTable').textContent = 'Столик ' + data.reservation.table_number + ' (' + data.reservation.table_description + ')';
-            document.getElementById('modalName').textContent = data.reservation.client_name;
-            document.getElementById('modalPhone').textContent = data.reservation.client_phone;
-            
-            if (data.reservation.client_email) {
-                document.getElementById('modalEmail').textContent = data.reservation.client_email;
-                document.getElementById('modalEmailContainer').style.display = 'flex';
-            }
-            
-            if (data.reservation.special_requests) {
-                document.getElementById('modalRequests').textContent = data.reservation.special_requests;
-                document.getElementById('modalRequestsContainer').style.display = 'flex';
-            }
-            
-            // Показываем модальное окно
-            var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-            reservationModal.show();
-        } else {
-            alert('Ошибки: ' + JSON.stringify(data.errors));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Произошла ошибка при отправке формы');
-    });
-});
-
-// Функция переключения между шагами
-function showStep(stepNumber) {
-    document.querySelectorAll('.confirmation-step').forEach(step => {
-        step.classList.remove('active');
-    });
-    document.getElementById('step' + stepNumber).classList.add('active');
-    
-    // Обновление индикатора прогресса
-    document.querySelectorAll('.progress-divider').forEach((divider, index) => {
-        if (index < stepNumber - 1) {
-            divider.classList.add('bg-primary');
-        } else {
-            divider.classList.remove('bg-primary');
+        
+        // Выбор столика
+        const selectedTableId = '{{ reservation_data.table }}';
+        if (selectedTableId) {
+            document.querySelectorAll('.table-card').forEach(table => {
+                if (table.dataset.tableId === selectedTableId) {
+                    table.classList.add('selected');
+                    document.getElementById('id_table').value = selectedTableId;
+                    
+                    // Показываем номер выбранного столика на шаге 3
+                    const tableNumber = table.querySelector('h5').textContent;
+                    document.getElementById('selectedTableNumber').textContent = tableNumber.replace('Столик ', '');
+                }
+            });
         }
     });
-    
-    document.querySelectorAll('.badge.rounded-circle').forEach((badge, index) => {
-        if (index < stepNumber) {
-            badge.classList.add('bg-primary');
-            badge.classList.remove('bg-secondary');
-        } else {
-            badge.classList.remove('bg-primary');
-            badge.classList.add('bg-secondary');
-        }
-    });
-}
 </script>
 {% endblock %}

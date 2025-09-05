@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django import forms
 from .models import Reservation, Table
 
@@ -7,23 +6,19 @@ class ReservationStep1Form(forms.Form):
         widget=forms.DateInput(attrs={
             'type': 'date',
             'class': 'form-control',
+            'id': 'reservationDate'
         })
     )
     time = forms.TimeField(widget=forms.HiddenInput())
     guests_count = forms.ChoiceField(
         choices=[(i, f"{i} человек") for i in range(1, 21)],
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'guestsCount'})
     )
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Устанавливаем минимальную дату в виджете после инициализации формы
-        self.fields['date'].widget.attrs['min'] = timezone.now().date().isoformat()
 
 class ReservationStep2Form(forms.Form):
     table = forms.ModelChoiceField(
         queryset=Table.objects.none(),
-        widget=forms.HiddenInput()  # Скрытое поле, будем заполнять через JS
+        widget=forms.HiddenInput()
     )
 
 class ReservationStep3Form(forms.ModelForm):
@@ -31,8 +26,8 @@ class ReservationStep3Form(forms.ModelForm):
         model = Reservation
         fields = ['client_name', 'client_phone', 'client_email', 'special_requests']
         widgets = {
-            'client_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'client_phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'client_email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'client_name': forms.TextInput(attrs={'class': 'form-control', 'id': 'clientName'}),
+            'client_phone': forms.TextInput(attrs={'class': 'form-control', 'id': 'clientPhone'}),
+            'client_email': forms.EmailInput(attrs={'class': 'form-control', 'id': 'clientEmail'}),
+            'special_requests': forms.Textarea(attrs={'class': 'form-control', 'id': 'specialRequests', 'rows': 3}),
         }
