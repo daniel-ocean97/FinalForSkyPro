@@ -166,10 +166,10 @@
                         {{ form.table }}
                         
                         <div class="row mt-4">
-                            {% for table in form.fields.table.queryset %}
+                            {% for table in tables_with_availability %}
                             <div class="col-md-3 mb-4">
                                 <div class="card table-card text-center p-3 {% if not table.available %}disabled{% endif %}" 
-                                     data-table-id="{{ table.id }}">
+                                    data-table-id="{{ table.id }}">
                                     <h5>Столик {{ table.number }}</h5>
                                     <p class="text-muted">{{ table.description }}</p>
                                     <div class="mt-2">
@@ -359,55 +359,12 @@
 </div>
 
 <script>
-    // Обновление доступного времени при изменении даты или количества гостей
-    document.getElementById('reservationDate').addEventListener('change', updateAvailableTimes);
-    document.getElementById('guestsCount').addEventListener('change', updateAvailableTimes);
-
-    function updateAvailableTimes() {
-    const date = document.getElementById('reservationDate').value;
-    const guests = document.getElementById('guestsCount').value;
-    
-    if (!date) return;
-    
-    fetch('{% url "restaurant:get_available_times" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: `date=${date}&guests_count=${guests}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        const timeSlotsContainer = document.getElementById('timeSlots');
-        timeSlotsContainer.innerHTML = '';
-        
-        data.available_hours.forEach(hour => {
-            const col = document.createElement('div');
-            col.className = 'col-4 col-sm-3 mb-2';
-            
-            const card = document.createElement('div');
-            card.className = `card time-slot text-center p-2 ${hour.available ? '' : 'bg-secondary text-white'}`;
-            card.dataset.time = hour.time;
-            card.textContent = hour.time;
-            
-            if (hour.available) {
-                card.addEventListener('click', function() {
-                    document.querySelectorAll('.time-slot').forEach(s => {
-                        s.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    document.getElementById('id_time').value = this.dataset.time;
-                });
-            }
-            
-            col.appendChild(card);
-            timeSlotsContainer.appendChild(col);
-        });
-    });
-}
+document.addEventListener('DOMContentLoaded', function() {
     // Текущая дата для ограничения выбора
-    document.getElementById('reservationDate').min = new Date().toISOString().split('T')[0];
+    const reservationDateEl = document.getElementById('reservationDate');
+    if (reservationDateEl) {
+        reservationDateEl.min = new Date().toISOString().split('T')[0];
+    }
     
     // Выбор времени
     document.querySelectorAll('.time-slot').forEach(slot => {
@@ -425,7 +382,12 @@
     });
     
     // Выбор столика
-    document.querySelectorAll('.table-card:not(.disabled)').forEach(table => {
+    document.querySelectorAll('.table-card').forEach(table => {
+        // Пропускаем недоступные столы
+        if (table.classList.contains('disabled')) {
+            return;
+        }
+        
         table.addEventListener('click', function() {
             document.querySelectorAll('.table-card').forEach(t => {
                 t.classList.remove('selected');
@@ -437,45 +399,47 @@
             
             // Показываем номер выбранного столика на шаге 3
             const tableNumber = this.querySelector('h5').textContent;
-            document.getElementById('selectedTableNumber').textContent = tableNumber.replace('Столик ', '');
+            if (document.getElementById('selectedTableNumber')) {
+                document.getElementById('selectedTableNumber').textContent = tableNumber.replace('Столик ', '');
+            }
         });
     });
     
     // Показываем модальное окно при успешном бронировании
     {% if show_success_modal %}
-    document.addEventListener('DOMContentLoaded', function() {
-        var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-        reservationModal.show();
-    });
+    var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+    reservationModal.show();
     {% endif %}
     
     // Автоматически выбираем время и столик, если они уже были выбраны ранее
-    document.addEventListener('DOMContentLoaded', function() {
-        // Выбор времени
-        const selectedTime = '{{ reservation_data.time }}';
-        if (selectedTime) {
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                if (slot.dataset.time === selectedTime) {
-                    slot.classList.add('selected');
-                    document.getElementById('id_time').value = selectedTime;
-                }
-            });
-        }
-        
-        // Выбор столика
-        const selectedTableId = '{{ reservation_data.table }}';
-        if (selectedTableId) {
-            document.querySelectorAll('.table-card').forEach(table => {
-                if (table.dataset.tableId === selectedTableId) {
-                    table.classList.add('selected');
-                    document.getElementById('id_table').value = selectedTableId;
-                    
-                    // Показываем номер выбранного столика на шаге 3
-                    const tableNumber = table.querySelector('h5').textContent;
+    // Выбор времени
+    const selectedTime = '{{ reservation_data.time }}';
+    if (selectedTime) {
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            if (slot.dataset.time === selectedTime) {
+                slot.classList.add('selected');
+                document.getElementById('id_time').value = selectedTime;
+            }
+        });
+    }
+    
+    // Выбор столика
+    const selectedTableId = '{{ reservation_data.table }}';
+    if (selectedTableId) {
+        document.querySelectorAll('.table-card').forEach(table => {
+            if (table.dataset.tableId === selectedTableId) {
+                table.classList.add('selected');
+                document.getElementById('id_table').value = selectedTableId;
+                
+                // Показываем номер выбранного столика на шаге 3
+                const tableNumber = table.querySelector('h5').textContent;
+                if (document.getElementById('selectedTableNumber')) {
                     document.getElementById('selectedTableNumber').textContent = tableNumber.replace('Столик ', '');
                 }
-            });
-        }
-    });
+            }
+        });
+    }
+});
+</script>
 </script>
 {% endblock %}
