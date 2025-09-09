@@ -2,13 +2,14 @@ import datetime
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
-from restaurant.forms import ReservationStep1Form, ReservationStep2Form, ReservationStep3Form
+from restaurant.forms import ReservationStep1Form, ReservationStep2Form, ReservationStep3Form, ReservationEditForm
 from restaurant.services import calculate_available_times, get_available_tables
 from .models import Restaurant, Table, Reservation
 from django.contrib import messages
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 def restaurant_detail(request):
     # Получаем активный ресторан (например, первый)
@@ -48,6 +49,9 @@ def reservation(request):
     show_success_modal = request.GET.get('success') == 'true'
     last_reservation = request.session.get('last_reservation', {})
     tables_with_availability = []
+
+    display_date = ''
+    table_number = ''
     
     # Обработка POST-запросов
     if request.method == 'POST':
@@ -123,6 +127,9 @@ def reservation(request):
                 reservation.time = datetime.datetime.strptime(reservation_data.get('time'), '%H:%M').time()
                 reservation.guests_count = reservation_data.get('guests_count')
                 reservation.table_id = reservation_data.get('table')
+                # Привязываем пользователя, если он авторизован
+                if request.user.is_authenticated:
+                    reservation.user = request.user
                 reservation.save()
                 
                 request.session['last_reservation'] = {
@@ -193,6 +200,35 @@ def reservation(request):
                 available_hours = []
     
     elif step == '3':
+    # Подготовка данных для отображения
+        date_str = reservation_data.get('date', '')
+        time_str = reservation_data.get('time', '')
+        table_id = reservation_data.get('table', '')
+        
+        # Форматирование даты для отображения
+        display_date = ''
+        if date_str:
+            try:
+                date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+                # Форматируем дату по-русски (например: "15 мая")
+                months = {
+                    1: 'января', 2: 'февраля', 3: 'марта', 4: 'апреля',
+                    5: 'мая', 6: 'июня', 7: 'июля', 8: 'августа',
+                    9: 'сентября', 10: 'октября', 11: 'ноября', 12: 'декабря'
+                }
+                display_date = f"{date_obj.day} {months[date_obj.month]}"
+            except (ValueError, TypeError):
+                display_date = date_str
+        
+        # Получаем номер столика
+        table_number = ''
+        if table_id:
+            try:
+                table = Table.objects.get(id=table_id)
+                table_number = table.number
+            except Table.DoesNotExist:
+                table_number = 'Неизвестный столик'
+        
         if form is None:
             form = ReservationStep3Form()
     else:
@@ -210,7 +246,9 @@ def reservation(request):
         'last_reservation': last_reservation,
         'available_hours': available_hours,
         'tables_with_availability': tables_with_availability,
-    })
+        'display_date': display_date,  # Добавьте это
+        'table_number': table_number,  # И это
+})
 @csrf_exempt
 def get_available_times(request):
     if request.method == 'POST':
@@ -225,3 +263,43 @@ def get_available_times(request):
             return JsonResponse({'error': 'Invalid date format'}, status=400)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+@login_required
+def my_reservations(request):
+    restaurant = Restaurant.objects.first()
+    active_reservations = Reservation.objects.filter(user=request.user, status__in=['pending', 'confirmed']).order_by('date', 'time')
+    past_reservations = Reservation.objects.filter(user=request.user, status__in=['completed', 'cancelled']).order_by('-date', '-time')
+    return render(request, 'restaurant/my_reservations.html', {
+        'restaurant': restaurant,
+        'active_reservations': active_reservations,
+        'past_reservations': past_reservations,
+    })
+
+
+@login_required
+def edit_reservation(request, pk):
+    restaurant = Restaurant.objects.first()
+    reservation = get_object_or_404(Reservation, pk=pk, user=request.user, status__in=['pending', 'confirmed'])
+    if request.method == 'POST':
+        form = ReservationEditForm(request.POST, instance=reservation)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Бронирование обновлено')
+            return redirect('restaurant:my_reservations')
+    else:
+        form = ReservationEditForm(instance=reservation)
+    return render(request, 'restaurant/edit_reservation.html', {
+        'restaurant': restaurant,
+        'form': form,
+        'reservation': reservation,
+    })
+
+
+@login_required
+def cancel_reservation(request, pk):
+    reservation = get_object_or_404(Reservation, pk=pk, user=request.user, status__in=['pending', 'confirmed'])
+    reservation.status = 'cancelled'
+    reservation.save(update_fields=['status'])
+    messages.success(request, 'Бронирование отменено')
+    return redirect('restaurant:my_reservations')

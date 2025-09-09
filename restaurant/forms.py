@@ -1,5 +1,7 @@
 from django import forms
 from .models import Reservation, Table
+from django import forms
+from django.core.exceptions import ValidationError
 
 class ReservationStep1Form(forms.Form):
     date = forms.DateField(
@@ -25,6 +27,28 @@ class ReservationStep3Form(forms.ModelForm):
     class Meta:
         model = Reservation
         fields = ['client_name', 'client_phone', 'client_email', 'special_requests']
+
+
+class ReservationEditForm(forms.ModelForm):
+    class Meta:
+        model = Reservation
+        fields = ['date', 'time', 'guests_count', 'special_requests']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        instance = self.instance
+        date = cleaned_data.get('date')
+        time = cleaned_data.get('time')
+        if instance and instance.table and date and time:
+            conflict_exists = Reservation.objects.filter(
+                table=instance.table,
+                date=date,
+                time=time,
+                status__in=['pending', 'confirmed']
+            ).exclude(pk=instance.pk).exists()
+            if conflict_exists:
+                raise ValidationError('На выбранные дату и время столик уже занят.')
+        return cleaned_data
         widgets = {
             'client_name': forms.TextInput(attrs={'class': 'form-control', 'id': 'clientName'}),
             'client_phone': forms.TextInput(attrs={'class': 'form-control', 'id': 'clientPhone'}),

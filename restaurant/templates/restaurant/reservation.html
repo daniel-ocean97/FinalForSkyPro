@@ -39,12 +39,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section" 
-         style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                url('{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}');
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;">
+<section class="hero-section">
     <div class="container text-center">
         <h1 class="display-4 fw-bold mb-4">Бронирование столика</h1>
         <p class="lead mb-4">Забронируйте столик онлайн всего за несколько кликов</p>
@@ -200,12 +195,30 @@
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title mb-4">Ваши данные</h3>
-                    <p class="text-muted">Бронирование на 
-                        <span>{{ reservation_data.date|date:"d E" }}, {{ reservation_data.time }}</span> 
-                        для <span>{{ reservation_data.guests_count }} гостей</span>,
-                        столик <span id="selectedTableNumber"></span>
-                    </p>
-                    
+                    <!-- Детали бронирования в стилизованном блоке -->
+                    <div class="alert alert-light border mb-4">
+                        <h6 class="alert-heading mb-3">Детали бронирования:</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-event text-primary me-2"></i>
+                                    <span class="fw-medium">{{ display_date }}, {{ reservation_data.time }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-people text-primary me-2"></i>
+                                    <span class="fw-medium">{{ reservation_data.guests_count }} гостей</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-table text-primary me-2"></i>
+                                    <span class="fw-medium">Столик {{ table_number }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="step" value="3">

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои бронирования{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Мои бронирования</h2>
+
+    <h4 class="mt-3">Текущие</h4>
+    {% if active_reservations %}
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Время</th>
+                    <th>Столик</th>
+                    <th>Гостей</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in active_reservations %}
+                <tr>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.time }}</td>
+                    <td>№ {{ r.table.number }}</td>
+                    <td>{{ r.guests_count }}</td>
+                    <td>{{ r.get_status_display }}</td>
+                    <td class="text-nowrap">
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'restaurant:edit_reservation' r.id %}">Изменить</a>
+                        <a class="btn btn-sm btn-outline-danger" href="{% url 'restaurant:cancel_reservation' r.id %}" onclick="return confirm('Отменить бронирование?');">Отменить</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-muted">Нет активных бронирований.</p>
+    {% endif %}
+
+    <h4 class="mt-4">История</h4>
+    {% if past_reservations %}
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Время</th>
+                    <th>Столик</th>
+                    <th>Гостей</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in past_reservations %}
+                <tr>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.time }}</td>
+                    <td>№ {{ r.table.number }}</td>
+                    <td>{{ r.guests_count }}</td>
+                    <td>{{ r.get_status_display }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-muted">История пуста.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+
