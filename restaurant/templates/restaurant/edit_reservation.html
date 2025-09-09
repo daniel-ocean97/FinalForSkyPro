@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Изменить бронирование{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Изменить бронирование №{{ reservation.id }}</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Дата</label>
+                    {{ form.date }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Время</label>
+                    {{ form.time }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Количество гостей</label>
+                    {{ form.guests_count }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Особые пожелания</label>
+                    {{ form.special_requests }}
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'restaurant:my_reservations' %}" class="btn btn-secondary ms-2">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'restaurant',
+    
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -52,7 +55,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+SESSION_COOKIE_AGE = 1209600  # время жизни сессии в секундах (2 недели)
+SESSION_COOKIE_SECURE = False  # True для HTTPS в продакшене
+SESSION_COOKIE_HTTPONLY = True  # защита от XSS-атак
+
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False  # False позволяет JavaScript читать CSRF-токен
+SESSION_SAVE_EVERY_REQUEST = True
+
 ROOT_URLCONF = 'myproject.urls'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEMPLATES = [
     {
@@ -130,3 +145,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'  # URL для доступа к медиафайлам
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
+
+# Auth redirects
+LOGIN_REDIRECT_URL = 'restaurant:restaurant_detail'
+LOGOUT_REDIRECT_URL = 'restaurant:restaurant_detail'
+LOGIN_URL = 'users:login'

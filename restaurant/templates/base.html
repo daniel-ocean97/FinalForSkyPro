@@ -20,7 +20,7 @@
 </head>
 <body>
     <header>
-        <nav class="container navbar navbar-expand-lg navbar-light mt-3 mb-5">
+        <nav class="container navbar navbar-expand-lg navbar-dark mt-3 mb-5">
             <div class="container">
                 <a class="navbar-brand" href="{% url 'restaurant:restaurant_detail' %}">
                     {% if restaurant.logo %}
@@ -34,22 +34,34 @@
                 </button>
                 
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
                         <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'restaurant:restaurant_detail' %}">Главная</a>
+                            <a class="nav-link" href="{% url 'restaurant:restaurant_detail' %}">Главная</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Меню</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Бронирование</a>
+                            <a class="nav-link" href="{% url 'restaurant:reservation' %}">Бронирование</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'restaurant:contacts' %}">Контакты</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item me-lg-3">
                             <a class="nav-link" href="{% url 'restaurant:about' %}">О нас</a>
                         </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item d-flex ms-lg-2">
+                            <a class="btn btn-light me-2" href="{% url 'users:profile' %}">Профиль</a>
+                            <a class="btn btn-light me-2" href="{% url 'restaurant:my_reservations' %}">Мои бронирования</a>
+                            <a class="btn btn-primary" href="{% url 'users:logout' %}">Выйти</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item d-flex ms-lg-2">
+                            <a class="btn btn-light me-2" href="{% url 'users:login' %}">Войти</a>
+                            <a class="btn btn-primary" href="{% url 'users:register' %}">Регистрация</a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
