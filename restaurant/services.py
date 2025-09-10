@@ -7,11 +7,12 @@ def calculate_available_times(selected_date, guests_count):
     """
     Рассчитывает доступное время для бронирования на указанную дату
     """
-    today = timezone.now().date()
+    now = timezone.now()
+    today = now.date()
+
     if selected_date < today:
         return []
 
-    now = timezone.now()
     current_time = now.time()
     opening_time = datetime.time(10, 0)
     closing_time = datetime.time(22, 0)
@@ -30,7 +31,7 @@ def calculate_available_times(selected_date, guests_count):
         busy_tables_by_time[time_str].add(reservation.table_id)
         
         next_hour = (datetime.datetime.combine(selected_date, reservation.time) + 
-                    datetime.timedelta(hours=1)).time()
+                    datetime.timedelta(hours=2)).time()
         next_hour_str = next_hour.strftime('%H:%M')
         if next_hour_str not in busy_tables_by_time:
             busy_tables_by_time[next_hour_str] = set()

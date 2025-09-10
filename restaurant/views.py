@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from restaurant.forms import ReservationStep1Form, ReservationStep2Form, ReservationStep3Form, ReservationEditForm
 from restaurant.services import calculate_available_times, get_available_tables
-from .models import Restaurant, Table, Reservation
+from .models import Restaurant, Table, Reservation, Feedback
 from django.contrib import messages
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -27,7 +27,9 @@ def contacts(request):
         subject = request.POST.get('subject')
         message = request.POST.get('message')
         
-        # Здесь можно добавить отправку email или сохранение в базу
+        feedback = Feedback.objects.create(name=name, phone=phone, email=email, subject=subject, message=message)
+        feedback.save()
+
         messages.success(request, 'Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.')
         return redirect('restaurant:contacts')
     

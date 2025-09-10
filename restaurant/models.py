@@ -113,3 +113,9 @@ class Reservation(models.Model):
     def __str__(self):
         return f"{self.client_name} - {self.date} {self.time}"
 
+class Feedback(models.Model):
+    name = models.CharField(max_length=150, verbose_name="Имя")
+    phone = models.CharField(max_length=150)
+    email = models.CharField(max_length=150)
+    subject = models.CharField(max_length=150)
+    message = models.CharField(max_length=150)
