@@ -143,7 +143,7 @@ footer {
 }
 
 .social-links a {
-    color: white;
+    color: rgba(44, 62, 80, 0.95);
     font-size: 1.5rem;
     margin-right: 1rem;
     transition: color 0.3s ease;
@@ -151,6 +151,11 @@ footer {
 
 .social-links a:hover {
     color: var(--accent-color);
+}
+
+/* В футере иконки остаются белыми по умолчанию */
+footer .social-links a {
+    color: white;
 }
 
 .description {

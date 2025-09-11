@@ -1,13 +1,10 @@
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from .forms import (
-    UserRegisterForm,
-    EmailAuthenticationForm,
-    UserProfileForm,
-)
+from .forms import EmailAuthenticationForm, UserProfileForm, UserRegisterForm
 
 
 def register(request):
@@ -28,7 +25,9 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             auth_login(request, user)
-            next_url = request.GET.get("next") or reverse("restaurant:restaurant_detail")
+            next_url = request.GET.get("next") or reverse(
+                "restaurant:restaurant_detail"
+            )
             return redirect(next_url)
     else:
         form = EmailAuthenticationForm()
