@@ -6,7 +6,8 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section" >
+<section class="hero-section hero-section--image-only">
+    <img src="{% if restaurant.cover_image %}{{ restaurant.cover_image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80{% endif %}" alt="Фасад ресторана">
     <div class="container text-center">
         <h1 class="display-4 fw-bold mb-4">О ресторане</h1>
         <p class="lead mb-4">Узнайте нашу историю, ценности и команду</p>

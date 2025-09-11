@@ -223,28 +223,40 @@
                         {% csrf_token %}
                         <input type="hidden" name="step" value="3">
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="clientName" class="form-label">Имя *</label>
-                                {{ form.client_name }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.client_name }}
+                                    <label for="clientName">Имя *</label>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="clientPhone" class="form-label">Телефон *</label>
-                                {{ form.client_phone }}
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.client_phone }}
+                                    <label for="clientPhone">Телефон *</label>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="clientEmail" class="form-label">Email</label>
-                            {{ form.client_email }}
+                        <div class="row g-3 mt-1">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form.client_email }}
+                                    <label for="clientEmail">Email</label>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="specialRequests" class="form-label">Особые пожелания</label>
-                            {{ form.special_requests }}
+                        <div class="row g-3 mt-1">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form.special_requests }}
+                                    <label for="specialRequests">Особые пожелания</label>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="form-check mb-4">
+                        <div class="form-check mt-3 mb-4">
                             <input class="form-check-input" type="checkbox" id="agreement" required>
                             <label class="form-check-label" for="agreement">
                                 Я соглашаюсь с правилами бронирования и обработкой персональных данных
@@ -328,6 +340,9 @@
         </div>
     </div>
 </div>
+
+<!-- Флаги-шаблона для JS -->
+<div id="reservationFlags" data-show-success="{{ show_success_modal|yesno:'1,0' }}" hidden></div>
 
 <!-- Информация о бронировании -->
 <div class="container mb-5">
@@ -419,10 +434,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Показываем модальное окно при успешном бронировании
-    {% if show_success_modal %}
-    var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-    reservationModal.show();
-    {% endif %}
+    const flagsEl = document.getElementById('reservationFlags');
+    const showSuccess = flagsEl && flagsEl.dataset.showSuccess === '1';
+    if (showSuccess) {
+        var reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+        reservationModal.show();
+    }
     
     // Автоматически выбираем время и столик, если они уже были выбраны ранее
     // Выбор времени
@@ -453,6 +470,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script>
 </script>
 {% endblock %}

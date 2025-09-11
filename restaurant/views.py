@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from restaurant.forms import (ReservationEditForm, ReservationStep1Form,
                               ReservationStep2Form, ReservationStep3Form)
@@ -301,20 +301,17 @@ def reservation(request):
     )
 
 
-@csrf_exempt
+@require_POST
 def get_available_times(request):
-    if request.method == "POST":
-        date_str = request.POST.get("date")
-        guests_count = int(request.POST.get("guests_count", 2))
+    date_str = request.POST.get("date")
+    guests_count = int(request.POST.get("guests_count", 2))
 
-        try:
-            selected_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
-            available_hours = calculate_available_times(selected_date, guests_count)
-            return JsonResponse({"available_hours": available_hours})
-        except (ValueError, TypeError):
-            return JsonResponse({"error": "Invalid date format"}, status=400)
-
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    try:
+        selected_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        available_hours = calculate_available_times(selected_date, guests_count)
+        return JsonResponse({"available_hours": available_hours})
+    except (ValueError, TypeError):
+        return JsonResponse({"error": "Invalid date format"}, status=400)
 
 
 @login_required

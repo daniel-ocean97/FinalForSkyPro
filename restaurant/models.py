@@ -123,3 +123,6 @@ class Feedback(models.Model):
     email = models.CharField(max_length=150)
     subject = models.CharField(max_length=150)
     message = models.CharField(max_length=150)
+
+    def __str__(self):
+        return f"Обращение {self.name} по теме {self.subject}"

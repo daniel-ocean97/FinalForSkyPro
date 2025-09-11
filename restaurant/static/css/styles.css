@@ -64,6 +64,44 @@ main {
     border-radius: 15px;
 }
 
+.hero-section--full-image {
+    padding: 0;
+    margin-bottom: 0;
+    width: 100%;
+    border-radius: 0;
+    background-size: contain;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-color: #000;
+}
+
+.hero-section.hero-section--image-only {
+    position: relative;
+    padding: 0;
+    margin-bottom: 0;
+    border-radius: 0;
+    overflow: hidden;
+    background: none;
+}
+
+.hero-section.hero-section--image-only > img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.hero-section.hero-section--image-only .container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    padding: 2rem;
+}
+
 .card {
     border: none;
     border-radius: 12px;
@@ -357,4 +395,20 @@ footer .social-links a {
 
 .bg-danger {
     background-color: #dc3545 !important;
+}
+
+.form-floating > .form-control,
+.form-floating > .form-control-plaintext,
+.form-floating > .form-select {
+    padding: 1rem 0.75rem;
+}
+
+.form-floating > label {
+    color: var(--primary-color);
+    opacity: 0.85;
+}
+
+/* Увеличим высоту текстового поля пожеланий для лучшей читаемости */
+#specialRequests.form-control {
+    min-height: 120px;
 }

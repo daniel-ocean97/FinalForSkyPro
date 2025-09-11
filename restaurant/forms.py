@@ -27,12 +27,55 @@ class ReservationStep3Form(forms.ModelForm):
     class Meta:
         model = Reservation
         fields = ["client_name", "client_phone", "client_email", "special_requests"]
+        widgets = {
+            "client_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "id": "clientName",
+                    "placeholder": "Имя",
+                    "autocomplete": "name",
+                }
+            ),
+            "client_phone": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "id": "clientPhone",
+                    "placeholder": "+7 (___) ___-__-__",
+                    "inputmode": "tel",
+                    "autocomplete": "tel",
+                }
+            ),
+            "client_email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "id": "clientEmail",
+                    "placeholder": "name@example.com",
+                    "autocomplete": "email",
+                }
+            ),
+            "special_requests": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "id": "specialRequests",
+                    "rows": 4,
+                    "placeholder": "Пожелания",
+                }
+            ),
+        }
 
 
 class ReservationEditForm(forms.ModelForm):
     class Meta:
         model = Reservation
         fields = ["date", "time", "guests_count", "special_requests"]
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "time": forms.TimeInput(attrs={"type": "time", "class": "form-control"}),
+            "guests_count": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "special_requests": forms.Textarea(
+                attrs={"class": "form-control", "rows": 4}
+            ),
+        }
 
     def clean(self):
         cleaned_data = super().clean()
@@ -53,17 +96,3 @@ class ReservationEditForm(forms.ModelForm):
             if conflict_exists:
                 raise ValidationError("На выбранные дату и время столик уже занят.")
         return cleaned_data
-        widgets = {
-            "client_name": forms.TextInput(
-                attrs={"class": "form-control", "id": "clientName"}
-            ),
-            "client_phone": forms.TextInput(
-                attrs={"class": "form-control", "id": "clientPhone"}
-            ),
-            "client_email": forms.EmailInput(
-                attrs={"class": "form-control", "id": "clientEmail"}
-            ),
-            "special_requests": forms.Textarea(
-                attrs={"class": "form-control", "id": "specialRequests", "rows": 3}
-            ),
-        }
