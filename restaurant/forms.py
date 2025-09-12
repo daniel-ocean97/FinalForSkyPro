@@ -71,7 +71,9 @@ class ReservationEditForm(forms.ModelForm):
         widgets = {
             "date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
             "time": forms.TimeInput(attrs={"type": "time", "class": "form-control"}),
-            "guests_count": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "guests_count": forms.NumberInput(
+                attrs={"class": "form-control", "min": 1}
+            ),
             "special_requests": forms.Textarea(
                 attrs={"class": "form-control", "rows": 4}
             ),

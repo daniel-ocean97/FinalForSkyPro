@@ -58,8 +58,8 @@ docker compose up -d --build
 3) Примените миграции и создайте суперпользователя:
 
 ```bash
-docker compose exec web python manage.py migrate --settings=myproject.docker_settings
-docker compose exec web python manage.py createsuperuser --settings=myproject.docker_settings
+docker compose exec web python manage.py migrate --settings=myproject.settings
+docker compose exec web python manage.py createsuperuser --settings=myproject.settings
 ```
 
 4) Откройте `http://localhost:8000/`.
@@ -86,8 +86,13 @@ pip install -r requirements.txt
 python manage.py migrate
 python manage.py csu (логин и пароль можно посмотреть в кастомной команде)
 ```
+4) ОБЯЗАТЕЛЬНО заполнить базу данных тестовыми данными 
 
-4) Запуск дев-сервера:
+```bash
+python manage.py seed
+```
+
+5) Запуск дев-сервера:
 
 ```bash
 python manage.py runserver

@@ -3,7 +3,7 @@ import datetime
 
 from django.utils import timezone
 
-from .models import Reservation, Table
+from .models import Reservation, Restaurant, Table
 
 
 def calculate_available_times(selected_date, guests_count):
@@ -98,3 +98,75 @@ def get_available_tables(selected_date, selected_time, guests_count):
         table.available = table.id not in busy_tables
 
     return tables
+
+
+# --------- Helpers extracted for views readability ---------
+
+
+def get_active_restaurant():
+    """
+    Возвращает активный ресторан если есть, иначе первый попавшийся.
+    """
+    restaurant = Restaurant.objects.filter(is_active=True).first()
+    if restaurant is None:
+        restaurant = Restaurant.objects.first()
+    return restaurant
+
+
+def compute_available_hours_for_step1(date_value, guests_count, today):
+    """
+    Универсальная обертка для расчета доступных часов на шаге 1.
+    Принимает дату (date/str/None) и возвращает список часов с флагом доступности.
+    """
+    try:
+        if date_value:
+            if isinstance(date_value, datetime.date):
+                selected_date = date_value
+            else:
+                selected_date = datetime.datetime.strptime(
+                    str(date_value), "%Y-%m-%d"
+                ).date()
+        else:
+            selected_date = today
+        return calculate_available_times(selected_date, int(guests_count or 2))
+    except (ValueError, TypeError):
+        return []
+
+
+def format_display_date_ru(date_str):
+    """
+    Форматирует дату YYYY-MM-DD в строку вроде "15 мая" для отображения.
+    Возвращает исходную строку при ошибке.
+    """
+    if not date_str:
+        return ""
+    try:
+        date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        months = {
+            1: "января",
+            2: "февраля",
+            3: "марта",
+            4: "апреля",
+            5: "мая",
+            6: "июня",
+            7: "июля",
+            8: "августа",
+            9: "сентября",
+            10: "октября",
+            11: "ноября",
+            12: "декабря",
+        }
+        return f"{date_obj.day} {months[date_obj.month]}"
+    except (ValueError, TypeError):
+        return date_str
+
+
+def get_table_number_safe(table_id):
+    """Возвращает номер столика по id или дефолтную строку."""
+    if not table_id:
+        return ""
+    try:
+        table = Table.objects.get(id=table_id)
+        return table.number
+    except Table.DoesNotExist:
+        return "Неизвестный столик"

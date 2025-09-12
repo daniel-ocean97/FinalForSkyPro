@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 class Restaurant(models.Model):
@@ -47,11 +48,6 @@ class Table(models.Model):
 
     def is_available(self, date, time):
         """Проверяет, свободен ли столик в указанные дату и время"""
-        from datetime import timedelta
-
-        from django.utils import timezone
-
-        print(f"Checking availability for table {self.number} on {date} at {time}")
 
         # Преобразуем время в объект datetime для сравнения
         datetime_selected = timezone.make_aware(timezone.datetime.combine(date, time))

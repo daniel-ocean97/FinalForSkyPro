@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure--lml8)@o3%7l(+sanp3nmyr0&fukac*2fcj8!)k_#(rjwjv#-v"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,11 +97,11 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "restaurant",  # Имя вашей базы данных
-        "USER": "postgres",  # Имя пользователя PostgreSQL
-        "PASSWORD": "3228",  # Пароль пользователя
-        "HOST": "localhost",  # Хост (или IP-адрес)
-        "PORT": "5432",  # Порт PostgreSQL
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT"),
     }
 }
 
@@ -141,6 +147,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+STATIC_ROOT = "/app/static"
+
 MEDIA_URL = "/media/"  # URL для доступа к медиафайлам
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
@@ -151,3 +159,9 @@ AUTH_USER_MODEL = "users.User"
 LOGIN_REDIRECT_URL = "restaurant:restaurant_detail"
 LOGOUT_REDIRECT_URL = "restaurant:restaurant_detail"
 LOGIN_URL = "users:login"
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(
+    ","
+)
+
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")

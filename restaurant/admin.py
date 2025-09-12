@@ -10,13 +10,13 @@ class RestaurantAdmin(admin.ModelAdmin):
 
 
 @admin.register(Table)
-class RestaurantAdmin(admin.ModelAdmin):
+class TableAdmin(admin.ModelAdmin):
     list_display = ["number", "description", "is_active"]
     search_fields = ["number", "description"]
 
 
 @admin.register(Reservation)
-class RestaurantAdmin(admin.ModelAdmin):
+class ReservationAdmin(admin.ModelAdmin):
     list_display = ["client_name", "client_phone", "date"]
     search_fields = ["client_name", "date"]
 

@@ -6,7 +6,7 @@ register = template.Library()
 
 
 @register.filter
-def date(value, format_str):
+def date_str(value, format_str):
     if isinstance(value, str):
         try:
             value = datetime.strptime(value, "%Y-%m-%d").date()
