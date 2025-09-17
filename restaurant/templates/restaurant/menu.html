@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Меню - {{ restaurant.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-header {
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 60px 0;
+        margin-bottom: 40px;
+        background-image: url('{% static "images/menu-bg.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: darken;
+        color: white;
+    }
+    
+    .dish-card {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .dish-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    
+    .dish-image {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .dish-price {
+        font-weight: bold;
+        color: #d9534f;
+    }
+    
+    .dish-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .category-title {
+        margin: 40px 0 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #d9534f;
+    }
+    
+    .special-dishes {
+        background-color: #f8f9fa;
+        padding: 40px 0;
+        margin: 40px 0;
+    }
+    
+    .ingredients-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .dish-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Заголовок меню -->
+<section class="menu-header text-center">
+    <div class="container">
+        <h1 class="display-4">Меню ресторана</h1>
+        <p class="lead">Насладитесь изысканными блюдами нашей кухни</p>
+    </div>
+</section>
+
+<!-- Специальные предложения -->
+{% if special_dishes %}
+<section class="container">
+    <div class="container">
+        <h2 class="text-center mb-4">Специальные предложения</h2>
+        <div class="row">
+            {% for dish in special_dishes %}
+            <div class="col-md-4 mb-4">
+                <div class="card dish-card">
+                    {% if dish.image %}
+                    <img src="{{ dish.image.url }}" class="card-img-top dish-image" alt="{{ dish.name }}">
+                    {% else %}
+                    <img src="{% static 'images/dish-placeholder.jpg' %}" class="card-img-top dish-image" alt="{{ dish.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title dish-title">{{ dish.name }}</h5>
+                        <p class="card-text">{{ dish.description|truncatechars:100 }}</p>
+                        <p class="card-text ingredients-text"><small>Ингредиенты: {{ dish.ingredients }}</small></p>
+                        <p class="dish-price">{{ dish.price }} ₽</p>
+                        
+                        <span class="badge bg-danger dish-badge">Спецпредложение</span>
+                        {% if dish.is_vegetarian %}
+                        <span class="badge bg-success">Вегетарианское</span>
+                        {% endif %}
+                        {% if dish.is_spicy %}
+                        <span class="badge bg-warning text-dark">Острое</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Основное меню по категориям -->
+<section class="container">
+    {% for category in categories %}
+    <h2 class="category-title">{{ category.name }}</h2>
+    {% if category.description %}
+    <p class="mb-4">{{ category.description }}</p>
+    {% endif %}
+    
+    <div class="row">
+        {% for dish in category.available_dishes %}
+        <div class="col-md-4 mb-4">
+            <div class="card dish-card">
+                {% if dish.image %}
+                <img src="{{ dish.image.url }}" class="card-img-top dish-image" alt="{{ dish.name }}">
+                {% else %}
+                <img src="{% static 'images/dish-placeholder.jpg' %}" class="card-img-top dish-image" alt="{{ dish.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title dish-title">{{ dish.name }}</h5>
+                    <p class="card-text">{{ dish.description|truncatechars:100 }}</p>
+                    <p class="card-text ingredients-text"><small>Ингредиенты: {{ dish.ingredients }}</small></p>
+                    <p class="dish-price">{{ dish.price }} ₽</p>
+                    
+                    {% if dish.is_special %}
+                    <span class="badge bg-danger dish-badge">Спецпредложение</span>
+                    {% endif %}
+                    {% if dish.is_vegetarian %}
+                    <span class="badge bg-success">Вегетарианское</span>
+                    {% endif %}
+                    {% if dish.is_spicy %}
+                    <span class="badge bg-warning text-dark">Острое</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">В данной категории пока нет доступных блюд.</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+        <p class="text-center">Меню в процессе обновления. Пожалуйста, загляните позже.</p>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

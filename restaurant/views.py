@@ -16,7 +16,7 @@ from restaurant.services import (calculate_available_times,
                                  format_display_date_ru, get_active_restaurant,
                                  get_available_tables, get_table_number_safe)
 
-from .models import Feedback, Reservation, Table
+from .models import Dish, DishCategory, Feedback, Reservation, Table
 
 
 class RestaurantDetailView(TemplateView):
@@ -60,6 +60,28 @@ class AboutView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["restaurant"] = get_active_restaurant()
+        return context
+
+
+class MenuView(TemplateView):
+    template_name = "restaurant/menu.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["restaurant"] = get_active_restaurant()
+        
+        # Получаем все видимые категории блюд
+        categories = DishCategory.objects.filter(is_visible=True).order_by('order')
+        
+        # Для каждой категории получаем доступные блюда
+        for category in categories:
+            category.available_dishes = category.dishes.filter(is_available=True)
+        
+        context["categories"] = categories
+        
+        # Получаем специальные предложения
+        context["special_dishes"] = Dish.objects.filter(is_special=True, is_available=True)[:3]
+        
         return context
 
 

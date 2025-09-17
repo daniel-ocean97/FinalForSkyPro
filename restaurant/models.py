@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 class Restaurant(models.Model):
@@ -122,3 +123,51 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Обращение {self.name} по теме {self.subject}"
+
+
+class DishCategory(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Название категории")
+    slug = models.SlugField(unique=True, verbose_name="Слаг")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    order = models.PositiveIntegerField(default=0, verbose_name="Порядок отображения")
+    is_visible = models.BooleanField(default=True, verbose_name="Отображать на сайте")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Категория блюд"
+        verbose_name_plural = "Категории блюд"
+        ordering = ["order"]
+
+
+class Dish(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Название блюда")
+    slug = models.SlugField(max_length=100, unique=True, verbose_name="Slug")
+    category = models.ForeignKey(DishCategory, on_delete=models.CASCADE, related_name="dishes", verbose_name="Категория")
+    description = models.TextField(verbose_name="Описание")
+    ingredients = models.CharField(max_length=255, blank=True, verbose_name="Ингредиенты")
+    price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Цена")
+    image = models.ImageField(upload_to='dishes/', blank=True, null=True, verbose_name="Изображение")
+    is_available = models.BooleanField(default=True, verbose_name="Доступно")
+    is_special = models.BooleanField(default=False, verbose_name="Специальное предложение")
+    is_vegetarian = models.BooleanField(default=False, verbose_name="Вегетарианское")
+    is_spicy = models.BooleanField(default=False, verbose_name="Острое")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Блюдо"
+        verbose_name_plural = "Блюда"
+        ordering = ["category", "name"]
